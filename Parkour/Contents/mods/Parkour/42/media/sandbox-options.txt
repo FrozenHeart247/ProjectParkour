@@ -1,0 +1,25 @@
+VERSION = 1,
+
+option Parkour.EnableFrontFlip
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableFrontFlip,
+}
+
+option Parkour.EnablePlaceholder
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnablePlaceholder,
+}
+
+option Parkour.DebugLogging
+{
+    type = boolean,
+    default = false,
+    page = Parkour_Animations,
+    translation = Parkour_DebugLogging,
+}

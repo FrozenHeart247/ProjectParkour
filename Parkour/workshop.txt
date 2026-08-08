@@ -1,0 +1,5 @@
+version=1
+title=Parkour Animation Test
+description=Test mod that replaces the successful running vault over a low fence with a front flip.
+tags=Build 42
+visibility=private
