@@ -3,6 +3,7 @@
 	<m_Name>vaultOverRun</m_Name>
 	<m_AnimName>Parkour_CorkscrewVault</m_AnimName>
 	<m_BlendOutTime>0.35</m_BlendOutTime>
+	<m_SpeedScale>1.2</m_SpeedScale>
 	<m_Conditions x_name="c9278901-c1ed-4c54-8c25-3868f5e50a04">
 		<m_Name>ParkourVaultVariant</m_Name>
 		<m_Type>STRING</m_Type>

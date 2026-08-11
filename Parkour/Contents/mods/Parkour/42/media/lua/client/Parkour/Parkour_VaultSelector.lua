@@ -8,14 +8,20 @@ local VANILLA_VARIANT = "Vanilla"
 -- 2. Add its Sandbox option to media/sandbox-options.txt.
 -- 3. Add one entry here.
 -- 4. Add the matching conditioned AnimNode files.
-local VARIANTS = {
+local RUN_VARIANTS = {
     { id = "FrontFlip", sandboxKey = "EnableFrontFlip" },
     { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault" },
     { id = "DashVault", sandboxKey = "EnableDashVault" },
+    { id = "DiveRoll", sandboxKey = "EnableDiveRoll" },
 }
 
--- Each character owns a shuffled bag. Every enabled animation is played once
--- before the bag is filled and shuffled again.
+local SPRINT_VARIANTS = {
+    { id = "SpeedVault", sandboxKey = "EnableSpeedVault" },
+    { id = "VaultOver", sandboxKey = "EnableVaultOver" },
+}
+
+-- Each character owns a separate shuffled bag for run and sprint vaults.
+-- Every enabled animation is played once before its bag is shuffled again.
 local bagsByCharacter = {}
 local lastVariantByCharacter = {}
 
@@ -31,11 +37,11 @@ local function isEnabled(settings, sandboxKey)
     return not settings or settings[sandboxKey] ~= false
 end
 
-local function buildEnabledVariants()
+local function buildEnabledVariants(variants)
     local settings = getSettings()
     local enabled = {}
 
-    for _, variant in ipairs(VARIANTS) do
+    for _, variant in ipairs(variants) do
         if isEnabled(settings, variant.sandboxKey) then
             enabled[#enabled + 1] = variant.id
         end
@@ -55,7 +61,7 @@ local function shuffle(values)
     end
 end
 
-local function refillBag(character, enabled, signature)
+local function refillBag(character, poolName, enabled, signature)
     local values = {}
     for index = 1, #enabled do
         values[index] = enabled[index]
@@ -65,7 +71,8 @@ local function refillBag(character, enabled, signature)
 
     -- table.remove() takes the final element. Move an immediate repeat away
     -- from that position whenever at least two variants are available.
-    local lastVariant = lastVariantByCharacter[character]
+    local characterLastVariants = lastVariantByCharacter[character]
+    local lastVariant = characterLastVariants and characterLastVariants[poolName]
     if #values > 1 and values[#values] == lastVariant then
         values[1], values[#values] = values[#values], values[1]
     end
@@ -74,24 +81,35 @@ local function refillBag(character, enabled, signature)
         values = values,
         signature = signature,
     }
-    bagsByCharacter[character] = bag
+    local characterBags = bagsByCharacter[character]
+    if not characterBags then
+        characterBags = {}
+        bagsByCharacter[character] = characterBags
+    end
+    characterBags[poolName] = bag
     return bag
 end
 
-local function chooseVariant(character)
-    local enabled = buildEnabledVariants()
+local function chooseVariant(character, poolName, variants)
+    local enabled = buildEnabledVariants(variants)
     if #enabled == 0 then
         return VANILLA_VARIANT
     end
 
     local signature = getPoolSignature(enabled)
-    local bag = bagsByCharacter[character]
+    local characterBags = bagsByCharacter[character]
+    local bag = characterBags and characterBags[poolName]
     if not bag or bag.signature ~= signature or #bag.values == 0 then
-        bag = refillBag(character, enabled, signature)
+        bag = refillBag(character, poolName, enabled, signature)
     end
 
     local selected = table.remove(bag.values)
-    lastVariantByCharacter[character] = selected
+    local characterLastVariants = lastVariantByCharacter[character]
+    if not characterLastVariants then
+        characterLastVariants = {}
+        lastVariantByCharacter[character] = characterLastVariants
+    end
+    characterLastVariants[poolName] = selected
     return selected
 end
 
@@ -109,11 +127,14 @@ local function onAIStateChange(character, currentState, previousState)
 
     local climbState = ClimbOverFenceState.instance()
     if currentState == climbState then
-        local isRunningVault = character:getVariableBoolean("VaultOverRun")
         local outcome = character:getVariableString("ClimbFenceOutcome")
 
-        if isRunningVault and outcome == "success" then
-            local selected = chooseVariant(character)
+        if outcome == "success" and character:getVariableBoolean("VaultOverSprint") then
+            local selected = chooseVariant(character, "sprint", SPRINT_VARIANTS)
+            character:setVariable(VARIANT_VARIABLE, selected)
+            debugLog("Selected sprint-vault variant: " .. selected)
+        elseif outcome == "success" and character:getVariableBoolean("VaultOverRun") then
+            local selected = chooseVariant(character, "run", RUN_VARIANTS)
             character:setVariable(VARIANT_VARIABLE, selected)
             debugLog("Selected running-vault variant: " .. selected)
 

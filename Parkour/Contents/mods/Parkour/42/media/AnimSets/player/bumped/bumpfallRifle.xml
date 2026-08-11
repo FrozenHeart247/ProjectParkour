@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="bumpFall.xml">
+	<m_Name>bumpfallRifle</m_Name>
+	<m_Conditions x_name="67958ce1-c81c-4526-bafa-58e964221ce5">
+		<m_Name>Weapon</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>firearm</m_Value>
+	</m_Conditions>
+</animNode>

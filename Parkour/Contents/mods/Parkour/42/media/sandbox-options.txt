@@ -24,6 +24,30 @@ option Parkour.EnableDashVault
     translation = Parkour_EnableDashVault,
 }
 
+option Parkour.EnableDiveRoll
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDiveRoll,
+}
+
+option Parkour.EnableSpeedVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableSpeedVault,
+}
+
+option Parkour.EnableVaultOver
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableVaultOver,
+}
+
 option Parkour.DebugLogging
 {
     type = boolean,

@@ -7,6 +7,12 @@
     "Sandbox_Parkour_EnableCorkscrewVault_tooltip": "Allows Parkour_CorkscrewVault to be selected for a successful running vault over a low fence.",
     "Sandbox_Parkour_EnableDashVault": "Enable Dash Vault",
     "Sandbox_Parkour_EnableDashVault_tooltip": "Allows Parkour_DashVault to be selected for a successful running vault over a low fence.",
+    "Sandbox_Parkour_EnableDiveRoll": "Enable Dive Roll",
+    "Sandbox_Parkour_EnableDiveRoll_tooltip": "Allows Parkour_DiveRoll to be selected for a successful running vault over a low fence.",
+    "Sandbox_Parkour_EnableSpeedVault": "Enable Speed Vault",
+    "Sandbox_Parkour_EnableSpeedVault_tooltip": "Allows Parkour_SpeedVault to be selected for a successful sprint vault over a low fence.",
+    "Sandbox_Parkour_EnableVaultOver": "Enable Vault Over",
+    "Sandbox_Parkour_EnableVaultOver_tooltip": "Allows Parkour_VaultOver to be selected for a successful sprint vault over a low fence.",
     "Sandbox_Parkour_DebugLogging": "Log selected animation",
     "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault variant to console.txt."
 }

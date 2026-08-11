@@ -7,6 +7,12 @@
     "Sandbox_Parkour_EnableCorkscrewVault_tooltip": "Разрешает выбирать Parkour_CorkscrewVault при успешном перепрыгивании низкого забора с разбега.",
     "Sandbox_Parkour_EnableDashVault": "Включить Dash Vault",
     "Sandbox_Parkour_EnableDashVault_tooltip": "Разрешает выбирать Parkour_DashVault при успешном перепрыгивании низкого забора с разбега.",
+    "Sandbox_Parkour_EnableDiveRoll": "Включить Dive Roll",
+    "Sandbox_Parkour_EnableDiveRoll_tooltip": "Разрешает выбирать Parkour_DiveRoll при успешном перепрыгивании низкого забора с разбега.",
+    "Sandbox_Parkour_EnableSpeedVault": "Включить Speed Vault",
+    "Sandbox_Parkour_EnableSpeedVault_tooltip": "Разрешает выбирать Parkour_SpeedVault при успешном перепрыгивании низкого забора в спринте.",
+    "Sandbox_Parkour_EnableVaultOver": "Включить Vault Over",
+    "Sandbox_Parkour_EnableVaultOver_tooltip": "Разрешает выбирать Parkour_VaultOver при успешном перепрыгивании низкого забора в спринте.",
     "Sandbox_Parkour_DebugLogging": "Записывать выбранную анимацию в лог",
     "Sandbox_Parkour_DebugLogging_tooltip": "Записывает выбранный вариант прыжка в console.txt."
 }
