@@ -1,0 +1,5 @@
+{
+    "UI_optionscreen_binding_ParkourDodge_Category": "Паркур",
+    "UI_optionscreen_binding_ParkourDodge": "Уклонение",
+    "UI_optionscreen_binding_ParkourDodge_tooltip": "Обычное нажатие выполняет уклонение вперёд, а в боевой стойке — в выбранную сторону. По умолчанию клавиша не назначена."
+}

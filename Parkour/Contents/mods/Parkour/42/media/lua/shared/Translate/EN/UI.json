@@ -1,0 +1,5 @@
+{
+    "UI_optionscreen_binding_ParkourDodge_Category": "Parkour",
+    "UI_optionscreen_binding_ParkourDodge": "Dodge",
+    "UI_optionscreen_binding_ParkourDodge_tooltip": "Performs a forward dodge normally, or a directional dodge while aiming. Unassigned by default."
+}

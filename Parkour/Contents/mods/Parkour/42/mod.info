@@ -1,5 +1,5 @@
 name=Parkour Animation Test
 id=Parkour
-description=Replaces the successful running vault over a low fence with a front flip animation.
-modversion=0.1.0
+description=Adds custom parkour animations and an experimental directional dodge foundation.
+modversion=0.2.0
 versionMin=42.20

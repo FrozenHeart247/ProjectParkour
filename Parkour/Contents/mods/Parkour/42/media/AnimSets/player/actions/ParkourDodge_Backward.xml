@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ParkourDodge</m_Name>
+	<m_Priority>5</m_Priority>
+	<m_AnimName>Parkour_CorkscrewEvadeBack</m_AnimName>
+	<m_deferredBoneAxis>Y</m_deferredBoneAxis>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_EarlyBlendOut>true</m_EarlyBlendOut>
+	<m_Looped>false</m_Looped>
+	<m_SpeedScale>1.50</m_SpeedScale>
+	<m_BlendTime>0.08</m_BlendTime>
+	<m_BlendOutTime>0.45</m_BlendOutTime>
+	<m_Conditions>
+		<m_Name>PerformingAction</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>ParkourDodge</m_StringValue>
+	</m_Conditions>
+	<m_Conditions>
+		<m_Name>ParkourDodgeDirection</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>Backward</m_Value>
+	</m_Conditions>
+	<m_Events>
+		<m_EventName>ParkourDodgeDone</m_EventName>
+		<m_TimePc>0.95</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_SubStateBoneWeights>
+		<boneName>Dummy01</boneName>
+	</m_SubStateBoneWeights>
+</animNode>
