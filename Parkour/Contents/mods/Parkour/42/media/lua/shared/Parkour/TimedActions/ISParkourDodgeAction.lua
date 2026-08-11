@@ -5,9 +5,9 @@ ISParkourDodgeAction = ISBaseTimedAction:derive("ISParkourDodgeAction")
 local ACTION_ANIMATION = "ParkourDodge"
 local DIRECTION_VARIABLE = "ParkourDodgeDirection"
 
-local DODGE_DISTANCE = 2.0
-local DEFAULT_MOVEMENT_DURATION_MS = 600
-local BACKWARD_MOVEMENT_DURATION_MS = 1300 --1650
+local DODGE_DISTANCE = 3
+local DEFAULT_MOVEMENT_DURATION_MS = 700 --600
+local BACKWARD_MOVEMENT_DURATION_MS = 1600 --1650
 local BACKWARD_LINEAR_MOVEMENT_BLEND = 0.65
 -- The backward dodge currently lasts about 1.69 seconds at SpeedScale 1.50.
 -- Keep the emergency timeout beyond the animation event so it cannot cut the
