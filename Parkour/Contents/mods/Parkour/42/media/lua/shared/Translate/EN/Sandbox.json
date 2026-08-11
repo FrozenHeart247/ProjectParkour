@@ -13,6 +13,14 @@
     "Sandbox_Parkour_EnableSpeedVault_tooltip": "Allows Parkour_SpeedVault to be selected for a successful sprint vault over a low fence.",
     "Sandbox_Parkour_EnableVaultOver": "Enable Vault Over",
     "Sandbox_Parkour_EnableVaultOver_tooltip": "Allows Parkour_VaultOver to be selected for a successful sprint vault over a low fence.",
+    "Sandbox_Parkour_EnableDodgeDiveRollForward": "Enable forward Dive Roll",
+    "Sandbox_Parkour_EnableDodgeDiveRollForward_tooltip": "Allows Parkour_DiveRoll to be selected for the forward dodge branch.",
+    "Sandbox_Parkour_EnableDodgeCorkscrewEvadeBack": "Enable backward Corkscrew Evade",
+    "Sandbox_Parkour_EnableDodgeCorkscrewEvadeBack_tooltip": "Allows Parkour_CorkscrewEvadeBack to be selected for the backward dodge branch.",
+    "Sandbox_Parkour_EnableDodgeDiveRollLeft": "Enable left Dive Roll",
+    "Sandbox_Parkour_EnableDodgeDiveRollLeft_tooltip": "Allows Parkour_DiveRoll to be selected for the left dodge branch.",
+    "Sandbox_Parkour_EnableDodgeButterflyRight": "Enable right Butterfly Dodge",
+    "Sandbox_Parkour_EnableDodgeButterflyRight_tooltip": "Allows Parkour_ButterflyDodgeRight to be selected for the right dodge branch.",
     "Sandbox_Parkour_DebugLogging": "Log selected animation",
-    "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault variant to console.txt."
+    "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault or dodge variant to console.txt."
 }

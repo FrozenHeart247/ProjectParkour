@@ -4,15 +4,11 @@ ISParkourDodgeAction = ISBaseTimedAction:derive("ISParkourDodgeAction")
 
 local ACTION_ANIMATION = "ParkourDodge"
 local DIRECTION_VARIABLE = "ParkourDodgeDirection"
+local VARIANT_VARIABLE = "ParkourDodgeVariant"
 
-local DODGE_DISTANCE = 3
-local DEFAULT_MOVEMENT_DURATION_MS = 700 --600
-local BACKWARD_MOVEMENT_DURATION_MS = 1600 --1650
-local BACKWARD_LINEAR_MOVEMENT_BLEND = 0.65
--- The backward dodge currently lasts about 1.69 seconds at SpeedScale 1.50.
--- Keep the emergency timeout beyond the animation event so it cannot cut the
--- clip short and force an abrupt transition back to locomotion.
-local FAILSAFE_DURATION_MS = 2200
+local DEFAULT_DODGE_DISTANCE = 3
+local DEFAULT_MOVEMENT_DURATION_MS = 700
+local DEFAULT_FAILSAFE_DURATION_MS = 2200
 local MAX_MOVEMENT_STEP = 0.08
 
 local function debugLog(message)
@@ -152,6 +148,7 @@ function ISParkourDodgeAction:start()
     self.wasSprinting = self.character:isSprinting()
 
     self.character:setVariable(DIRECTION_VARIABLE, self.direction)
+    self.character:setVariable(VARIANT_VARIABLE, self.variant)
     self.character:setForwardDirection(self.facingX, self.facingY)
     self.character:setIgnoreMovement(true)
     self.character:setRunning(false)
@@ -166,27 +163,19 @@ function ISParkourDodgeAction:update()
     self.character:setForwardDirection(self.facingX, self.facingY)
 
     local elapsed = getTimestampMs() - self.startedAt
-    local movementDuration = DEFAULT_MOVEMENT_DURATION_MS
-    local linearMovementBlend = 0
-    if self.direction == "Backward" then
-        movementDuration = BACKWARD_MOVEMENT_DURATION_MS
-        linearMovementBlend = BACKWARD_LINEAR_MOVEMENT_BLEND
-    end
-
-    local movementProgress = math.min(math.max(elapsed / movementDuration, 0), 1)
+    local movementProgress = math.min(math.max(elapsed / self.movementDurationMs, 0), 1)
     local smoothProgress = movementProgress * movementProgress * (3 - 2 * movementProgress)
-    -- The backward evade keeps some linear velocity near its exit so the
-    -- locomotion state can take over without a visible stop-and-start.
-    local easedProgress = smoothProgress + (movementProgress - smoothProgress) * linearMovementBlend
-    local targetDistance = DODGE_DISTANCE * easedProgress
+    local easedProgress = smoothProgress
+        + (movementProgress - smoothProgress) * self.linearMovementBlend
+    local targetDistance = self.dodgeDistance * easedProgress
 
     if not self.movementBlocked and targetDistance > self.distanceMoved then
         moveDistance(self, targetDistance - self.distanceMoved)
     end
 
     -- Prevent a missing or rejected AnimNode from locking the player forever.
-    if elapsed >= FAILSAFE_DURATION_MS then
-        debugLog("Failsafe completion: " .. self.direction)
+    if elapsed >= self.failsafeDurationMs then
+        debugLog("Failsafe completion: " .. self.direction .. "/" .. self.variant)
         self:forceComplete()
     end
 end
@@ -204,6 +193,7 @@ function ISParkourDodgeAction:releaseControl()
     self.controlReleased = true
 
     self.character:clearVariable(DIRECTION_VARIABLE)
+    self.character:clearVariable(VARIANT_VARIABLE)
     if self.startedAt then
         self.character:setIgnoreMovement(self.wasIgnoringMovement == true)
         self.character:setRunning(self.wasRunning == true)
@@ -229,7 +219,7 @@ function ISParkourDodgeAction:getDuration()
     return -1
 end
 
-function ISParkourDodgeAction:new(character, direction, travelX, travelY, facingX, facingY)
+function ISParkourDodgeAction:new(character, direction, travelX, travelY, facingX, facingY, variantProfile)
     local action = ISBaseTimedAction.new(self, character)
     action.character = character
     action.direction = direction
@@ -237,6 +227,13 @@ function ISParkourDodgeAction:new(character, direction, travelX, travelY, facing
     action.travelY = travelY
     action.facingX = facingX
     action.facingY = facingY
+    action.variant = variantProfile and variantProfile.id or "Default"
+    action.dodgeDistance = variantProfile and variantProfile.distance or DEFAULT_DODGE_DISTANCE
+    action.movementDurationMs = variantProfile and variantProfile.movementDurationMs
+        or DEFAULT_MOVEMENT_DURATION_MS
+    action.linearMovementBlend = variantProfile and variantProfile.linearMovementBlend or 0
+    action.failsafeDurationMs = variantProfile and variantProfile.failsafeDurationMs
+        or DEFAULT_FAILSAFE_DURATION_MS
     action.distanceMoved = 0
     action.movementBlocked = false
     action.isInvalid = false

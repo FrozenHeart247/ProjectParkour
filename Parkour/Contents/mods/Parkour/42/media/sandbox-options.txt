@@ -48,6 +48,38 @@ option Parkour.EnableVaultOver
     translation = Parkour_EnableVaultOver,
 }
 
+option Parkour.EnableDodgeDiveRollForward
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeDiveRollForward,
+}
+
+option Parkour.EnableDodgeCorkscrewEvadeBack
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeCorkscrewEvadeBack,
+}
+
+option Parkour.EnableDodgeDiveRollLeft
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeDiveRollLeft,
+}
+
+option Parkour.EnableDodgeButterflyRight
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeButterflyRight,
+}
+
 option Parkour.DebugLogging
 {
     type = boolean,

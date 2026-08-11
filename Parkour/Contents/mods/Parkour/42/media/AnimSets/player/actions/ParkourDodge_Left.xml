@@ -20,7 +20,12 @@
 		<m_Type>STRING</m_Type>
 		<m_Value>Left</m_Value>
 	</m_Conditions>
-	<m_Events>
+	<m_Conditions x_name="4d718c7e-7a32-4e47-8d5d-0f36bf111a43">
+		<m_Name>ParkourDodgeVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>DiveRollLeft</m_Value>
+	</m_Conditions>
+	<m_Events x_name="83cd1789-274b-44aa-91e1-3a5c25555994">
 		<m_EventName>ParkourDodgeDone</m_EventName>
 		<m_TimePc>0.95</m_TimePc>
 		<m_ParameterValue></m_ParameterValue>

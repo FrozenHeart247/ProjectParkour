@@ -1,5 +1,6 @@
 require "Parkour/Parkour_DodgeConfig"
 require "Parkour/TimedActions/ISParkourDodgeAction"
+local ParkourDodgeSelector = require "Parkour/Parkour_DodgeSelector"
 
 local ParkourDodgeInput = {}
 
@@ -91,6 +92,12 @@ local function tryStartDodge(character)
         return
     end
 
+    local variant = ParkourDodgeSelector.choose(character, direction)
+    if not variant then
+        debugLog("No enabled dodge variant for direction: " .. direction)
+        return
+    end
+
     cooldownByCharacter[character] = now + COOLDOWN_MS
     ISTimedActionQueue.add(ISParkourDodgeAction:new(
         character,
@@ -98,11 +105,13 @@ local function tryStartDodge(character)
         travelX,
         travelY,
         facingX,
-        facingY
+        facingY,
+        variant
     ))
     debugLog(string.format(
-        "Started %s (travel %.3f, %.3f; facing %.3f, %.3f)",
+        "Started %s/%s (travel %.3f, %.3f; facing %.3f, %.3f)",
         direction,
+        variant.id,
         travelX,
         travelY,
         facingX,
