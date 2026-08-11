@@ -8,12 +8,20 @@ option Parkour.EnableFrontFlip
     translation = Parkour_EnableFrontFlip,
 }
 
-option Parkour.EnablePlaceholder
+option Parkour.EnableCorkscrewVault
 {
     type = boolean,
     default = true,
     page = Parkour_Animations,
-    translation = Parkour_EnablePlaceholder,
+    translation = Parkour_EnableCorkscrewVault,
+}
+
+option Parkour.EnableDashVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDashVault,
 }
 
 option Parkour.DebugLogging

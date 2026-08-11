@@ -3,14 +3,15 @@ local ParkourVaultSelector = {}
 local VARIANT_VARIABLE = "ParkourVaultVariant"
 local VANILLA_VARIANT = "Vanilla"
 
--- To add a real animation later:
+-- To add another animation later:
 -- 1. Put its GLB into media/anims_X/Bob.
 -- 2. Add its Sandbox option to media/sandbox-options.txt.
 -- 3. Add one entry here.
 -- 4. Add the matching conditioned AnimNode files.
 local VARIANTS = {
     { id = "FrontFlip", sandboxKey = "EnableFrontFlip" },
-    { id = "Placeholder", sandboxKey = "EnablePlaceholder" },
+    { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault" },
+    { id = "DashVault", sandboxKey = "EnableDashVault" },
 }
 
 -- Each character owns a shuffled bag. Every enabled animation is played once
@@ -115,9 +116,11 @@ local function onAIStateChange(character, currentState, previousState)
             local selected = chooseVariant(character)
             character:setVariable(VARIANT_VARIABLE, selected)
             debugLog("Selected running-vault variant: " .. selected)
+
+            -- Keep the condition alive after ClimbOverFenceState exits so the
+            -- selected AnimNode can finish blending out. The next vault always
+            -- overwrites this value before its animation is selected.
         end
-    elseif previousState == climbState then
-        character:clearVariable(VARIANT_VARIABLE)
     end
 end
 

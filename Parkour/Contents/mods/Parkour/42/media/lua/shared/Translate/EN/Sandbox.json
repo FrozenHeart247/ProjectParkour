@@ -3,8 +3,10 @@
     "Sandbox_Parkour_Animations": "Parkour — Animations",
     "Sandbox_Parkour_EnableFrontFlip": "Enable Front Flip",
     "Sandbox_Parkour_EnableFrontFlip_tooltip": "Allows Parkour_FrontFlip to be selected for a successful running vault over a low fence.",
-    "Sandbox_Parkour_EnablePlaceholder": "Enable placeholder animation",
-    "Sandbox_Parkour_EnablePlaceholder_tooltip": "Allows the temporary placeholder clip to be selected. Replace Parkour_Placeholder.glb with a future animation while keeping the same name.",
+    "Sandbox_Parkour_EnableCorkscrewVault": "Enable Corkscrew Vault",
+    "Sandbox_Parkour_EnableCorkscrewVault_tooltip": "Allows Parkour_CorkscrewVault to be selected for a successful running vault over a low fence.",
+    "Sandbox_Parkour_EnableDashVault": "Enable Dash Vault",
+    "Sandbox_Parkour_EnableDashVault_tooltip": "Allows Parkour_DashVault to be selected for a successful running vault over a low fence.",
     "Sandbox_Parkour_DebugLogging": "Log selected animation",
-    "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault variant to console.txt. Useful while the placeholder and Front Flip look identical."
+    "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault variant to console.txt."
 }

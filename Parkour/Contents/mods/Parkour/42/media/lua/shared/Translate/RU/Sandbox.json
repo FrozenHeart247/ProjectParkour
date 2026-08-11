@@ -3,8 +3,10 @@
     "Sandbox_Parkour_Animations": "Паркур — анимации",
     "Sandbox_Parkour_EnableFrontFlip": "Включить Front Flip",
     "Sandbox_Parkour_EnableFrontFlip_tooltip": "Разрешает выбирать Parkour_FrontFlip при успешном перепрыгивании низкого забора с разбега.",
-    "Sandbox_Parkour_EnablePlaceholder": "Включить плейсхолдерную анимацию",
-    "Sandbox_Parkour_EnablePlaceholder_tooltip": "Разрешает выбирать временный клип-плейсхолдер. В будущем файл Parkour_Placeholder.glb можно заменить новой анимацией, сохранив его имя.",
+    "Sandbox_Parkour_EnableCorkscrewVault": "Включить Corkscrew Vault",
+    "Sandbox_Parkour_EnableCorkscrewVault_tooltip": "Разрешает выбирать Parkour_CorkscrewVault при успешном перепрыгивании низкого забора с разбега.",
+    "Sandbox_Parkour_EnableDashVault": "Включить Dash Vault",
+    "Sandbox_Parkour_EnableDashVault_tooltip": "Разрешает выбирать Parkour_DashVault при успешном перепрыгивании низкого забора с разбега.",
     "Sandbox_Parkour_DebugLogging": "Записывать выбранную анимацию в лог",
-    "Sandbox_Parkour_DebugLogging_tooltip": "Записывает выбранный вариант прыжка в console.txt. Полезно, пока плейсхолдер и Front Flip выглядят одинаково."
+    "Sandbox_Parkour_DebugLogging_tooltip": "Записывает выбранный вариант прыжка в console.txt."
 }

@@ -5,7 +5,7 @@
 	<m_AnimName>Parkour_FrontFlip</m_AnimName>
 	<m_Looped>false</m_Looped>
 	<m_BlendTime>0.05</m_BlendTime>
-	<m_BlendOutTime>0.35</m_BlendOutTime>
+	<m_BlendOutTime>0.25</m_BlendOutTime>
 	<m_SpeedScale>1.00</m_SpeedScale>
 	<m_Conditions x_name="5ab8a885-6e42-4b39-8496-08eedc533f44">
 		<m_Name>ClimbFenceStarted</m_Name>
@@ -34,7 +34,7 @@
 	</m_Events>
 	<m_Events x_name="3c43b08f-546f-4a20-8c67-d6994c111fa0">
 		<m_EventName>SetVariable</m_EventName>
-		<m_TimePc>0.95</m_TimePc>
+		<m_TimePc>0.80</m_TimePc>
 		<m_ParameterValue>ClimbFenceFinished=true</m_ParameterValue>
 	</m_Events>
 	<m_Events x_name="88c602fc-3305-45e5-b186-2f7a4fa534ec">
