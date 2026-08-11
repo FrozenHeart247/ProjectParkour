@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="vaultOverRunFail.xml">
+	<m_Name>vaultOverRunFail1Handed</m_Name>
+	<m_Conditions x_name="be577c1c-9c88-42e9-9131-276ccc304daf">
+		<m_Name>Weapon</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>1handed</m_Value>
+	</m_Conditions>
+</animNode>
