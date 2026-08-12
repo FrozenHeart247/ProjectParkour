@@ -56,6 +56,14 @@ option Parkour.EnableDodgeDiveRollForward
     translation = Parkour_EnableDodgeDiveRollForward,
 }
 
+option Parkour.EnableDodgeForwardRollForward
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeForwardRollForward,
+}
+
 option Parkour.EnableDodgeCorkscrewEvadeBack
 {
     type = boolean,
@@ -70,6 +78,14 @@ option Parkour.EnableDodgeDiveRollLeft
     default = true,
     page = Parkour_Animations,
     translation = Parkour_EnableDodgeDiveRollLeft,
+}
+
+option Parkour.EnableDodgeSideFlipLeft
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableDodgeSideFlipLeft,
 }
 
 option Parkour.EnableDodgeButterflyRight
