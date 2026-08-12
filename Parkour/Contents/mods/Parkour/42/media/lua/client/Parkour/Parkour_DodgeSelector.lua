@@ -8,6 +8,9 @@ local VARIANTS_BY_DIRECTION = {
             id = "DiveRollForward",
             sandboxKey = "EnableDodgeDiveRollForward",
             movementDurationMs = 700,
+            -- 1.80 s clip / 1.20 speed, released at ~92% so the
+            -- hit-reaction AnimSet never reaches its vanilla fallback node.
+            reactionDurationMs = 1380,
             linearMovementBlend = 0,
             distance = 1,
             failsafeDurationMs = 2200,
@@ -16,6 +19,8 @@ local VARIANTS_BY_DIRECTION = {
             id = "ForwardRollDodge",
             sandboxKey = "EnableDodgeForwardRollForward",
             movementDurationMs = 980, --1150
+            -- 1.20 s clip / 1.35 speed, released before ActiveAnimFinished.
+            reactionDurationMs = 820,
             linearMovementBlend = 0.65,
             distance = 5,
             failsafeDurationMs = 2200,
@@ -26,8 +31,10 @@ local VARIANTS_BY_DIRECTION = {
             id = "CorkscrewEvadeBack",
             sandboxKey = "EnableDodgeCorkscrewEvadeBack",
             movementDurationMs = 1600,
+            -- 2.533 s clip / 1.50 speed.
+            reactionDurationMs = 1550,
             linearMovementBlend = 0.65,
-            distance = 3,
+            distance = 4,
             failsafeDurationMs = 2200,
         },
     },
@@ -36,16 +43,20 @@ local VARIANTS_BY_DIRECTION = {
             id = "DiveRollLeft",
             sandboxKey = "EnableDodgeDiveRollLeft",
             movementDurationMs = 700,
+            -- 1.80 s clip / 1.50 speed.
+            reactionDurationMs = 1100,
             linearMovementBlend = 0,
-            distance = 3,
+            distance = 4,
             failsafeDurationMs = 2200,
         },
         {
             id = "SideFlipDodgeLeft",
             sandboxKey = "EnableDodgeSideFlipLeft",
             movementDurationMs = 1600,
+            -- 2.60 s clip / 1.30 speed.
+            reactionDurationMs = 1840,
             linearMovementBlend = 0.65,
-            distance = 3,
+            distance = 4,
             failsafeDurationMs = 2200,
         },
     },
@@ -54,8 +65,10 @@ local VARIANTS_BY_DIRECTION = {
             id = "ButterflyDodgeRight",
             sandboxKey = "EnableDodgeButterflyRight",
             movementDurationMs = 1600,
+            -- 2.70 s clip / 1.50 speed.
+            reactionDurationMs = 1660,
             linearMovementBlend = 0.65,
-            distance = 3,
+            distance = 4,
             failsafeDurationMs = 2200,
         },
     },

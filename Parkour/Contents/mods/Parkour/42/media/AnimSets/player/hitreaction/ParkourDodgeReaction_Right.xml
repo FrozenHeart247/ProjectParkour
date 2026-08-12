@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ParkourDodgeReaction</m_Name>
+	<m_Priority>10</m_Priority>
+	<m_AnimName>Parkour_ButterflyDodgeRight</m_AnimName>
+	<m_deferredBoneAxis>Y</m_deferredBoneAxis>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_EarlyBlendOut>false</m_EarlyBlendOut>
+	<m_Looped>false</m_Looped>
+	<m_SpeedScale>1.50</m_SpeedScale>
+	<m_BlendTime>0.08</m_BlendTime>
+	<m_BlendOutTime>0.05</m_BlendOutTime>
+	<m_Conditions>
+		<m_Name>hitreaction</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>ParkourDodgeReaction</m_StringValue>
+	</m_Conditions>
+	<m_Conditions>
+		<m_Name>ParkourDodgeDirection</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>Right</m_StringValue>
+	</m_Conditions>
+	<m_Conditions>
+		<m_Name>ParkourDodgeVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>ButterflyDodgeRight</m_StringValue>
+	</m_Conditions>
+	<m_SubStateBoneWeights>
+		<boneName>Dummy01</boneName>
+	</m_SubStateBoneWeights>
+</animNode>

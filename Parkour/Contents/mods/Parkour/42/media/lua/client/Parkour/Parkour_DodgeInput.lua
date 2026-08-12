@@ -1,13 +1,15 @@
 require "Parkour/Parkour_DodgeConfig"
 require "Parkour/TimedActions/ISParkourDodgeAction"
 local ParkourDodgeSelector = require "Parkour/Parkour_DodgeSelector"
+local ParkourDodgeDirection = require "Parkour/Parkour_DodgeDirection"
 
 local ParkourDodgeInput = {}
 
-local INPUT_DEAD_ZONE = 0.15
 local COOLDOWN_MS = 750
+local DODGE_REQUEST_MS = 350
 
 local cooldownByCharacter = setmetatable({}, { __mode = "k" })
+local pendingByCharacter = setmetatable({}, { __mode = "k" })
 
 local function debugLog(message)
     local settings = SandboxVars and SandboxVars.Parkour
@@ -16,64 +18,74 @@ local function debugLog(message)
     end
 end
 
-local function normalized(x, y, fallbackX, fallbackY)
-    local length = math.sqrt(x * x + y * y)
-    if length <= 0.0001 then
-        return fallbackX, fallbackY
-    end
-    return x / length, y / length
+local function buildRequest(character)
+    local direction, travelX, travelY, facingX, facingY,
+        inputSource, forwardAmount, rightAmount = ParkourDodgeDirection.resolve(character)
+
+    return {
+        direction = direction,
+        travelX = travelX,
+        travelY = travelY,
+        facingX = facingX,
+        facingY = facingY,
+        inputSource = inputSource,
+        forwardAmount = forwardAmount,
+        rightAmount = rightAmount,
+    }
 end
 
-local function getFacing(character)
-    local facing = character:getForwardDirection()
-    if facing then
-        return normalized(facing:getX(), facing:getY(), 1, 0)
+local function startRequest(character, request, now, quiet)
+    if now < (cooldownByCharacter[character] or 0) then
+        return false
     end
 
-    local angle = character:getAnimAngleRadians()
-    return math.cos(angle), math.sin(angle)
-end
-
-local function getMovementInput(character)
-    local destination = Vector2.new(0, 0)
-    local movement = character:getInputMoveVector(destination) or destination
-    return movement:getX(), movement:getY()
-end
-
-local function resolveDirection(character)
-    local facingX, facingY = getFacing(character)
-
-    -- Outside combat stance a standalone press always dodges forward.
-    if not character:isAiming() then
-        return "Forward", facingX, facingY, facingX, facingY
-    end
-
-    local inputX, inputY = getMovementInput(character)
-    local inputLength = math.sqrt(inputX * inputX + inputY * inputY)
-
-    -- In combat stance a press without movement is a defensive back dodge.
-    if inputLength < INPUT_DEAD_ZONE then
-        return "Backward", -facingX, -facingY, facingX, facingY
-    end
-
-    inputX, inputY = normalized(inputX, inputY, facingX, facingY)
-
-    -- PZ world Y grows southward, so this is the local right vector.
-    local rightX, rightY = -facingY, facingX
-    local forwardAmount = inputX * facingX + inputY * facingY
-    local rightAmount = inputX * rightX + inputY * rightY
-
-    if math.abs(forwardAmount) >= math.abs(rightAmount) then
-        if forwardAmount >= 0 then
-            return "Forward", facingX, facingY, facingX, facingY
+    local direction = request.direction
+    local travelX = request.travelX
+    local travelY = request.travelY
+    if not ISParkourDodgeAction.canStart(
+        character,
+        travelX,
+        travelY,
+        request.escapeFromReaction
+    ) then
+        if not quiet then
+            debugLog("Blocked before start: " .. direction)
         end
-        return "Backward", -facingX, -facingY, facingX, facingY
+        return false
     end
 
-    if rightAmount >= 0 then
-        return "Right", rightX, rightY, facingX, facingY
+    local variant = ParkourDodgeSelector.choose(character, direction)
+    if not variant then
+        debugLog("No enabled dodge variant for direction: " .. direction)
+        return false
     end
-    return "Left", -rightX, -rightY, facingX, facingY
+
+    cooldownByCharacter[character] = now + COOLDOWN_MS
+    local dodgeAction = ISParkourDodgeAction:new(
+        character,
+        direction,
+        travelX,
+        travelY,
+        request.facingX,
+        request.facingY,
+        variant,
+        request.escapeFromReaction,
+        request.reactionAnimation
+    )
+    ISTimedActionQueue.add(dodgeAction)
+    debugLog(string.format(
+        "Started %s/%s (input %s; local F %.3f/R %.3f; travel %.3f, %.3f; facing %.3f, %.3f)",
+        direction,
+        variant.id,
+        request.inputSource,
+        request.forwardAmount,
+        request.rightAmount,
+        travelX,
+        travelY,
+        request.facingX,
+        request.facingY
+    ))
+    return true
 end
 
 local function tryStartDodge(character)
@@ -81,42 +93,64 @@ local function tryStartDodge(character)
         return
     end
 
+    -- Never queue a second dodge behind an action that is already running.
+    if character:hasTimedActions() then
+        debugLog("Ignored dodge while another timed action is active")
+        return
+    end
+
     local now = getTimestampMs()
-    if now < (cooldownByCharacter[character] or 0) then
+    local request = buildRequest(character)
+
+    if ISParkourDodgeAction.isEscapableReactionState(character) then
+        if not pendingByCharacter[character] then
+            request.escapeFromReaction = true
+            request.reactionAnimation = ISParkourDodgeAction.isHitReactionState(character)
+            request.expiresAt = now + DODGE_REQUEST_MS
+            pendingByCharacter[character] = request
+            debugLog("Scheduled from player reaction: " .. request.direction)
+        else
+            debugLog("Ignored repeated reaction dodge")
+        end
         return
     end
 
-    local direction, travelX, travelY, facingX, facingY = resolveDirection(character)
-    if not ISParkourDodgeAction.canStart(character, travelX, travelY) then
-        debugLog("Blocked before start: " .. direction)
+    if ISParkourDodgeAction.isForcedPlayerState(character) then
+        debugLog("Blocked by a hard player state: " .. request.direction)
         return
     end
 
-    local variant = ParkourDodgeSelector.choose(character, direction)
-    if not variant then
-        debugLog("No enabled dodge variant for direction: " .. direction)
+    -- A fresh safe-state press supersedes an older buffered request.
+    pendingByCharacter[character] = nil
+    startRequest(character, request, now, false)
+end
+
+local function onPlayerUpdate(character)
+    ISParkourDodgeAction.updateReactionTailGuard(character)
+
+    local request = pendingByCharacter[character]
+    if not request then
         return
     end
 
-    cooldownByCharacter[character] = now + COOLDOWN_MS
-    ISTimedActionQueue.add(ISParkourDodgeAction:new(
-        character,
-        direction,
-        travelX,
-        travelY,
-        facingX,
-        facingY,
-        variant
-    ))
-    debugLog(string.format(
-        "Started %s/%s (travel %.3f, %.3f; facing %.3f, %.3f)",
-        direction,
-        variant.id,
-        travelX,
-        travelY,
-        facingX,
-        facingY
-    ))
+    local now = getTimestampMs()
+    if now > request.expiresAt
+        or character:isDead()
+        or character:getVehicle() then
+        pendingByCharacter[character] = nil
+        debugLog("Buffered dodge expired or became invalid")
+        return
+    end
+
+    if ISParkourDodgeAction.isForcedPlayerState(character)
+        and not ISParkourDodgeAction.isEscapableReactionState(character) then
+        return
+    end
+
+    if startRequest(character, request, now, true) then
+        pendingByCharacter[character] = nil
+        debugLog("Started reaction dodge: " .. request.direction)
+    end
 end
 
 local function onKeyStartPressed(key)
@@ -129,5 +163,6 @@ local function onKeyStartPressed(key)
 end
 
 Events.OnKeyStartPressed.Add(onKeyStartPressed)
+Events.OnPlayerUpdate.Add(onPlayerUpdate)
 
 return ParkourDodgeInput

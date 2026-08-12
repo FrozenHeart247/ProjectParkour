@@ -25,6 +25,11 @@
 		<m_Type>STRING</m_Type>
 		<m_Value>ButterflyDodgeRight</m_Value>
 	</m_Conditions>
+	<m_Events x_name="2ca85a93-8e50-4d7d-883a-4ad15fcb9e71">
+		<m_EventName>ParkourDodgeStarted</m_EventName>
+		<m_TimePc>0.01</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
 	<m_Events x_name="83cd1789-274b-44aa-91e1-3a5c25555994">
 		<m_EventName>ParkourDodgeDone</m_EventName>
 		<m_TimePc>0.95</m_TimePc>
