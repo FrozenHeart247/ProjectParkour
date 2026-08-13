@@ -13,6 +13,8 @@
     "Sandbox_Parkour_EnableSpeedVault_tooltip": "Разрешает выбирать Parkour_SpeedVault при успешном перепрыгивании низкого забора в спринте.",
     "Sandbox_Parkour_EnableVaultOver": "Включить Vault Over",
     "Sandbox_Parkour_EnableVaultOver_tooltip": "Разрешает выбирать Parkour_VaultOver при успешном перепрыгивании низкого забора в спринте.",
+    "Sandbox_Parkour_EnableReverseVault": "Включить Reverse Vault",
+    "Sandbox_Parkour_EnableReverseVault_tooltip": "Заменяет обычное успешное перелезание низкого забора без бега или спринта на Parkour_ReverseVault.",
     "Sandbox_Parkour_EnableDodgeDiveRollForward": "Включить Dive Roll вперёд",
     "Sandbox_Parkour_EnableDodgeDiveRollForward_tooltip": "Разрешает выбирать Parkour_DiveRoll для уклонения вперёд.",
     "Sandbox_Parkour_EnableDodgeForwardRollForward": "Включить Roll Dodge вперёд",

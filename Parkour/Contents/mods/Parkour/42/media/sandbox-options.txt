@@ -48,6 +48,14 @@ option Parkour.EnableVaultOver
     translation = Parkour_EnableVaultOver,
 }
 
+option Parkour.EnableReverseVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableReverseVault,
+}
+
 option Parkour.EnableSprintWindowVault
 {
     type = boolean,

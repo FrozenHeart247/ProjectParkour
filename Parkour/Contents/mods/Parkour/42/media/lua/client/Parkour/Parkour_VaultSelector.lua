@@ -20,7 +20,11 @@ local SPRINT_VARIANTS = {
     { id = "VaultOver", sandboxKey = "EnableVaultOver" },
 }
 
--- Each character owns a separate shuffled bag for run and sprint vaults.
+local WALK_VARIANTS = {
+    { id = "ReverseVault", sandboxKey = "EnableReverseVault" },
+}
+
+-- Each character owns a separate shuffled bag for walk, run, and sprint vaults.
 -- Every enabled animation is played once before its bag is shuffled again.
 local bagsByCharacter = {}
 local lastVariantByCharacter = {}
@@ -147,6 +151,12 @@ local function onAIStateChange(character, currentState, previousState)
             -- Keep the condition alive after ClimbOverFenceState exits so the
             -- selected AnimNode can finish blending out. The next vault always
             -- overwrites this value before its animation is selected.
+        elseif outcome == "success"
+            and not character:getVariableBoolean("VaultOverSprint")
+            and not character:getVariableBoolean("VaultOverRun") then
+            local selected = chooseVariant(character, "walk", WALK_VARIANTS)
+            character:setVariable(VARIANT_VARIABLE, selected)
+            debugLog("Selected walking-vault variant: " .. selected)
         end
     end
 end
