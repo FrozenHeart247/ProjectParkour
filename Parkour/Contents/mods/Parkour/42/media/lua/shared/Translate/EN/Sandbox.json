@@ -17,6 +17,8 @@
     "Sandbox_Parkour_EnableSprintWindowVault_tooltip": "Automatically uses Parkour_SprintWindowVault when sprinting into an open or broken window, or an empty window frame.",
     "Sandbox_Parkour_EnableWallRunUp": "Enable roof climbing",
     "Sandbox_Parkour_EnableWallRunUp_tooltip": "Allows players to use Parkour_WallRunUp to climb a full wall onto a clear roof one level above.",
+    "Sandbox_Parkour_EnableFreeJump": "Enable forward jump",
+    "Sandbox_Parkour_EnableFreeJump_tooltip": "Allows the FreeJump action to clear low fences and ordinary obstacles, but never walls or tall fences.",
     "Sandbox_Parkour_EnableDodgeDiveRollForward": "Enable forward Dive Roll",
     "Sandbox_Parkour_EnableDodgeDiveRollForward_tooltip": "Allows Parkour_DiveRoll to be selected for the forward dodge branch.",
     "Sandbox_Parkour_EnableDodgeForwardRollForward": "Enable forward Roll Dodge",
@@ -30,5 +32,5 @@
     "Sandbox_Parkour_EnableDodgeButterflyRight": "Enable right Butterfly Dodge",
     "Sandbox_Parkour_EnableDodgeButterflyRight_tooltip": "Allows Parkour_ButterflyDodgeRight to be selected for the right dodge branch.",
     "Sandbox_Parkour_DebugLogging": "Log selected animation",
-    "Sandbox_Parkour_DebugLogging_tooltip": "Writes the selected vault or dodge variant to console.txt."
+    "Sandbox_Parkour_DebugLogging_tooltip": "Writes selected vault, dodge, jump, and traversal diagnostics to console.txt."
 }

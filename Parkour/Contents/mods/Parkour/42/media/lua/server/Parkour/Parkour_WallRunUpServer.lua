@@ -1,7 +1,11 @@
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
+local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
 
 local MODULE = "ParkourWallRunUp"
 local REQUEST_LIFETIME_MS = 7200
+local MIN_AIRBORNE_DELAY_MS = 800
+local MAX_AIRBORNE_DURATION_MS = 5000
+local ATTACK_TAIL_GUARD_MS = 1500
 local MIN_TRANSFER_DELAY_MS = 2400
 local MAX_ORIGIN_DISTANCE = 2.75
 local COOLDOWN_MS = 1000
@@ -79,10 +83,80 @@ local function beginRequest(player, args)
         originY = originY,
         originZ = originZ,
         directionName = args.directionName,
+        airborne = false,
+        airborneExpiresAt = nil,
+        airborneAttackers = ZombieAttackGuard.newAttackerSet(),
+        interruptedAttackerCount = 0,
     }
     cooldownByPlayer[player] = now + COOLDOWN_MS
     sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
     debugLog("Accepted begin request " .. tostring(requestId))
+end
+
+local function beginAirborneRequest(player, args)
+    local requestId = args and args.requestId
+    local request = player and pendingByPlayer[player]
+    if not request or request.requestId ~= requestId then
+        if player and isValidRequestId(requestId) then
+            reject(player, requestId, "Airborne", "request")
+        end
+        return
+    end
+
+    if request.airborne then
+        sendServerCommand(player, MODULE, "AirborneAccepted", {
+            requestId = requestId,
+        })
+        return
+    end
+
+    local now = getTimestampMs()
+    local dx = player:getX() - (request.originX + 0.5)
+    local dy = player:getY() - (request.originY + 0.5)
+    if player:isDead()
+        or player:getVehicle()
+        or now < request.startedAt + MIN_AIRBORNE_DELAY_MS
+        or now > request.expiresAt
+        or math.floor(player:getZ()) ~= request.originZ
+        or dx * dx + dy * dy > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE then
+        reject(player, requestId, "Airborne", "timing")
+        return
+    end
+
+    local target, reason = Validation.findTargetFromOrigin(
+        request.originX,
+        request.originY,
+        request.originZ,
+        request.directionName,
+        player
+    )
+    if not target then
+        reject(player, requestId, "Airborne", reason or "target")
+        return
+    end
+
+    request.airborne = true
+    request.airborneExpiresAt = math.min(
+        request.expiresAt,
+        now + MAX_AIRBORNE_DURATION_MS
+    )
+    sendServerCommand(player, MODULE, "AirborneAccepted", {
+        requestId = requestId,
+    })
+    debugLog("Accepted airborne guard " .. tostring(requestId))
+end
+
+local function finishAirborneGuard(player, request)
+    if not request or not request.airborne then
+        return
+    end
+
+    request.airborne = false
+    ZombieAttackGuard.beginTailGuard(
+        player,
+        request.airborneAttackers,
+        ATTACK_TAIL_GUARD_MS
+    )
 end
 
 local function completeRequest(player, args)
@@ -95,6 +169,7 @@ local function completeRequest(player, args)
         return
     end
     pendingByPlayer[player] = nil
+    finishAirborneGuard(player, request)
 
     local now = getTimestampMs()
     if player:isDead()
@@ -142,15 +217,66 @@ local function completeRequest(player, args)
     debugLog("Transferred request " .. tostring(requestId))
 end
 
+local function cancelRequest(player, args)
+    local requestId = args and args.requestId
+    local request = player and pendingByPlayer[player]
+    if not request or request.requestId ~= requestId then
+        return
+    end
+
+    pendingByPlayer[player] = nil
+    finishAirborneGuard(player, request)
+    debugLog("Cancelled request " .. tostring(requestId))
+end
+
 local function onClientCommand(module, command, player, args)
     if module ~= MODULE then
         return
     end
     if command == "Begin" then
         beginRequest(player, args)
+    elseif command == "Airborne" then
+        beginAirborneRequest(player, args)
     elseif command == "Transfer" then
         completeRequest(player, args)
+    elseif command == "Cancel" then
+        cancelRequest(player, args)
     end
 end
 
+local function updateAirborneGuards()
+    local now = getTimestampMs()
+
+    for player, request in pairs(pendingByPlayer) do
+        if not player
+            or player:isDead()
+            or player:getVehicle()
+            or now > request.expiresAt then
+            pendingByPlayer[player] = nil
+            finishAirborneGuard(player, request)
+        elseif request.airborne then
+            if now > request.airborneExpiresAt
+                or math.floor(player:getZ()) ~= request.originZ then
+                finishAirborneGuard(player, request)
+            else
+                local newlyInterrupted = ZombieAttackGuard.interruptNearby(
+                    player,
+                    request.airborneAttackers
+                )
+                if newlyInterrupted > 0 then
+                    request.interruptedAttackerCount = request.interruptedAttackerCount
+                        + newlyInterrupted
+                    debugLog(
+                        "Airborne interrupted zombie attackers: "
+                            .. tostring(request.interruptedAttackerCount)
+                    )
+                end
+            end
+        end
+    end
+
+    ZombieAttackGuard.updateAllTailGuards()
+end
+
 Events.OnClientCommand.Add(onClientCommand)
+Events.OnTick.Add(updateAirborneGuards)

@@ -1,6 +1,7 @@
 require "TimedActions/ISBaseTimedAction"
 
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
+local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
 
 ISParkourWallRunUpAction = ISBaseTimedAction:derive("ISParkourWallRunUpAction")
 
@@ -9,6 +10,7 @@ local ACTION_ANIMATION = "ParkourWallRunUp"
 local ANIMATION_START_TIMEOUT_MS = 600
 local ANIMATION_FAILSAFE_MS = 6200
 local NETWORK_REQUEST_LIFETIME_MS = 8200
+local ATTACK_TAIL_GUARD_MS = 1500
 
 local pendingNetworkRequests = {}
 local nextRequestId = 1
@@ -39,6 +41,35 @@ local function sendBegin(action)
         originZ = action.target.originZ,
         directionName = action.target.directionName,
     })
+end
+
+local function sendAirborne(action)
+    if not isClient() then
+        return
+    end
+    sendClientCommand(action.character, MODULE, "Airborne", {
+        requestId = action.requestId,
+    })
+end
+
+local function sendCancel(action)
+    if not isClient() or action.transferred then
+        return
+    end
+    sendClientCommand(action.character, MODULE, "Cancel", {
+        requestId = action.requestId,
+    })
+end
+
+local function beginAttackTailGuard(action)
+    if action.attackTailStarted then
+        return
+    end
+    action.attackTailStarted = ZombieAttackGuard.beginTailGuard(
+        action.character,
+        action.airborneAttackers,
+        ATTACK_TAIL_GUARD_MS
+    )
 end
 
 local function performLocalTransfer(action)
@@ -143,6 +174,25 @@ function ISParkourWallRunUpAction:update()
     if now - self.animationStartedAt >= ANIMATION_FAILSAFE_MS then
         debugLog("Animation failsafe for request " .. tostring(self.requestId))
         self:forceComplete()
+        return
+    end
+
+    -- Keep timeout handling ahead of the optional attack guard. Even if a
+    -- future game update changes one of the zombie APIs, the action can still
+    -- reach its failsafe and release movement normally.
+    if self.airborne then
+        local newlyInterrupted = ZombieAttackGuard.interruptNearby(
+            self.character,
+            self.airborneAttackers
+        )
+        if newlyInterrupted > 0 then
+            self.interruptedAttackerCount = self.interruptedAttackerCount
+                + newlyInterrupted
+            debugLog(
+                "Airborne interrupted zombie attackers: "
+                    .. tostring(self.interruptedAttackerCount)
+            )
+        end
     end
 end
 
@@ -166,7 +216,9 @@ function ISParkourWallRunUpAction:requestTransfer()
         debugLog("Local transfer rejected: " .. tostring(reason))
         self:forceComplete()
     else
+        self.airborne = false
         pendingNetworkRequests[self.requestId] = nil
+        beginAttackTailGuard(self)
         debugLog("Local transfer completed " .. tostring(self.requestId))
     end
 end
@@ -176,6 +228,11 @@ function ISParkourWallRunUpAction:animEvent(event, parameter)
         self.animationStarted = true
         self.animationStartedAt = getTimestampMs()
         debugLog("Animation confirmed " .. tostring(self.requestId))
+    elseif event == "ParkourWallRunAirborne" and not self.airborne then
+        self.airborne = true
+        self.airborneAt = getTimestampMs()
+        sendAirborne(self)
+        debugLog("Airborne guard requested " .. tostring(self.requestId))
     elseif event == "ParkourWallRunTransfer" then
         self:requestTransfer()
     elseif event == "ParkourWallRunDone" then
@@ -196,11 +253,16 @@ function ISParkourWallRunUpAction:releaseControl()
         return
     end
     self.controlReleased = true
+    self.airborne = false
     if self.ownsMovementLock then
         self.character:setIgnoreMovement(false)
         self.ownsMovementLock = false
     end
+    sendCancel(self)
     pendingNetworkRequests[self.requestId] = nil
+    -- Tail cleanup is deliberately last: movement must already be restored if
+    -- an optional reaction-cleanup call ever fails at runtime.
+    beginAttackTailGuard(self)
 end
 
 function ISParkourWallRunUpAction:stop()
@@ -235,15 +297,24 @@ function ISParkourWallRunUpAction.onServerCommand(module, command, args)
     if command == "BeginAccepted" then
         action.serverApproved = true
         debugLog("Server approved " .. tostring(args.requestId))
+    elseif command == "AirborneAccepted" then
+        action.airborneServerApproved = true
+        debugLog("Server approved airborne guard " .. tostring(args.requestId))
+    elseif command == "AirborneRejected" then
+        action.airborne = false
+        beginAttackTailGuard(action)
+        debugLog("Server rejected airborne guard: " .. tostring(args.reason))
     elseif command == "BeginRejected" then
         pendingNetworkRequests[args.requestId] = nil
         action.invalid = true
         debugLog("Server rejected start: " .. tostring(args.reason))
         action:forceComplete()
     elseif command == "TransferAccepted" then
-        pendingNetworkRequests[args.requestId] = nil
         Validation.moveCharacter(action.character, args.x, args.y, args.z)
         action.transferred = true
+        action.airborne = false
+        pendingNetworkRequests[args.requestId] = nil
+        beginAttackTailGuard(action)
         debugLog("Server transfer accepted " .. tostring(args.requestId))
         if action.animationDone then
             action:forceComplete()
@@ -256,7 +327,7 @@ function ISParkourWallRunUpAction.onServerCommand(module, command, args)
     end
 end
 
-function ISParkourWallRunUpAction.updateNetwork()
+function ISParkourWallRunUpAction.updateNetwork(character)
     local now = getTimestampMs()
     for requestId, entry in pairs(pendingNetworkRequests) do
         if now > entry.expiresAt then
@@ -266,6 +337,11 @@ function ISParkourWallRunUpAction.updateNetwork()
                 entry.action:forceComplete()
                 debugLog("Network request timed out " .. tostring(requestId))
             end
+        end
+    end
+    if character then
+        if ZombieAttackGuard.updateTailGuard(character) then
+            debugLog("Suppressed delayed airborne hit reaction")
         end
     end
 end
@@ -281,6 +357,12 @@ function ISParkourWallRunUpAction:new(character, target)
     action.animationStarted = false
     action.animationStartedAt = nil
     action.animationDone = false
+    action.airborne = false
+    action.airborneAt = nil
+    action.airborneServerApproved = not isClient()
+    action.airborneAttackers = ZombieAttackGuard.newAttackerSet()
+    action.interruptedAttackerCount = 0
+    action.attackTailStarted = false
     action.transferRequested = false
     action.transferred = false
     action.serverApproved = not isClient()

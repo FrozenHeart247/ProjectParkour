@@ -52,7 +52,7 @@ end
 
 local function onPlayerUpdate(character)
     if character and character:isLocalPlayer() then
-        ISParkourWallRunUpAction.updateNetwork()
+        ISParkourWallRunUpAction.updateNetwork(character)
     end
 end
 

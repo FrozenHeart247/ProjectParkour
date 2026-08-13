@@ -4,5 +4,8 @@
     "UI_optionscreen_binding_ParkourDodge_tooltip": "Performs a forward dodge normally, or a directional dodge while aiming. Unassigned by default.",
     "UI_optionscreen_binding_ParkourWallRunUp": "Climb onto roof",
     "UI_optionscreen_binding_ParkourWallRunUp_tooltip": "Runs up a full wall and climbs onto a clear roof one level above. Unassigned by default.",
-    "UI_Parkour_WallRunUp_Invalid": "No climbable roof directly ahead"
+    "UI_Parkour_WallRunUp_Invalid": "No climbable roof directly ahead",
+    "UI_optionscreen_binding_ParkourFreeJump": "Forward jump",
+    "UI_optionscreen_binding_ParkourFreeJump_tooltip": "Jumps forward up to two tiles normally, three while running, or four while sprinting. Unassigned by default.",
+    "UI_Parkour_FreeJump_Invalid": "No safe jump route or landing ahead"
 }

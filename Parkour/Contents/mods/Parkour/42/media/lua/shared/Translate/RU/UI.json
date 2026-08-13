@@ -4,5 +4,8 @@
     "UI_optionscreen_binding_ParkourDodge_tooltip": "Обычное нажатие выполняет уклонение вперёд, а в боевой стойке — в выбранную сторону. По умолчанию клавиша не назначена.",
     "UI_optionscreen_binding_ParkourWallRunUp": "Забраться на крышу",
     "UI_optionscreen_binding_ParkourWallRunUp_tooltip": "Позволяет взбежать по полноценной стене и забраться на свободную крышу этажом выше. По умолчанию клавиша не назначена.",
-    "UI_Parkour_WallRunUp_Invalid": "Прямо впереди нет доступной крыши"
+    "UI_Parkour_WallRunUp_Invalid": "Прямо впереди нет доступной крыши",
+    "UI_optionscreen_binding_ParkourFreeJump": "Прыжок вперёд",
+    "UI_optionscreen_binding_ParkourFreeJump_tooltip": "Прыжок вперёд на два тайла с места, три при беге или четыре в спринте. По умолчанию клавиша не назначена.",
+    "UI_Parkour_FreeJump_Invalid": "Впереди нет безопасной траектории или места для приземления"
 }

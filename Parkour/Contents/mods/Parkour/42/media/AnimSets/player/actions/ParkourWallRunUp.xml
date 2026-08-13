@@ -21,6 +21,11 @@
 		<m_ParameterValue></m_ParameterValue>
 	</m_Events>
 	<m_Events>
+		<m_EventName>ParkourWallRunAirborne</m_EventName>
+		<m_TimePc>0.20</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events>
 		<m_EventName>ParkourWallRunTransfer</m_EventName>
 		<m_TimePc>0.99</m_TimePc>
 		<m_ParameterValue></m_ParameterValue>

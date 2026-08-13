@@ -64,6 +64,14 @@ option Parkour.EnableWallRunUp
     translation = Parkour_EnableWallRunUp,
 }
 
+option Parkour.EnableFreeJump
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableFreeJump,
+}
+
 option Parkour.EnableDodgeDiveRollForward
 {
     type = boolean,

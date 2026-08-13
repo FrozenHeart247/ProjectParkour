@@ -5,9 +5,12 @@ local KEY_TEXT = "UI_optionscreen_binding_ParkourDodge"
 local TOOLTIP_TEXT = "UI_optionscreen_binding_ParkourDodge_tooltip"
 local WALL_RUN_KEY_TEXT = "UI_optionscreen_binding_ParkourWallRunUp"
 local WALL_RUN_TOOLTIP_TEXT = "UI_optionscreen_binding_ParkourWallRunUp_tooltip"
+local FREE_JUMP_KEY_TEXT = "UI_optionscreen_binding_ParkourFreeJump"
+local FREE_JUMP_TOOLTIP_TEXT = "UI_optionscreen_binding_ParkourFreeJump_tooltip"
 
 ParkourDodgeConfig.keyBind = nil
 ParkourDodgeConfig.wallRunUpKeyBind = nil
+ParkourDodgeConfig.freeJumpKeyBind = nil
 
 local function loadConfig()
     if not PZAPI or not PZAPI.ModOptions then
@@ -30,6 +33,19 @@ local function loadConfig()
         0,
         getText(WALL_RUN_TOOLTIP_TEXT)
     )
+    ParkourDodgeConfig.freeJumpKeyBind = options:addKeyBind(
+        "FreeJumpKey",
+        getText(FREE_JUMP_KEY_TEXT),
+        0,
+        getText(FREE_JUMP_TOOLTIP_TEXT)
+    )
+end
+
+function ParkourDodgeConfig.getFreeJumpKey()
+    if not ParkourDodgeConfig.freeJumpKeyBind then
+        return 0
+    end
+    return ParkourDodgeConfig.freeJumpKeyBind:getValue() or 0
 end
 
 function ParkourDodgeConfig.getWallRunUpKey()

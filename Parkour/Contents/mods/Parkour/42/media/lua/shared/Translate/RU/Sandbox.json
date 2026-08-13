@@ -29,6 +29,8 @@
     "Sandbox_Parkour_EnableSprintWindowVault_tooltip": "Автоматически запускает Parkour_SprintWindowVault при столкновении в спринте с открытым или разбитым окном либо пустой оконной рамой.",
     "Sandbox_Parkour_EnableWallRunUp": "Включить подъём на крышу",
     "Sandbox_Parkour_EnableWallRunUp_tooltip": "Позволяет игрокам использовать Parkour_WallRunUp, чтобы взбежать по полноценной стене на свободную крышу этажом выше.",
+    "Sandbox_Parkour_EnableFreeJump": "Включить прыжок вперёд",
+    "Sandbox_Parkour_EnableFreeJump_tooltip": "Позволяет перепрыгивать низкие заборы и обычные препятствия, но не стены и высокие ограждения.",
     "Sandbox_Parkour_DebugLogging": "Записывать выбранную анимацию в лог",
-    "Sandbox_Parkour_DebugLogging_tooltip": "Записывает выбранный вариант прыжка или уклонения в console.txt."
+    "Sandbox_Parkour_DebugLogging_tooltip": "Записывает диагностику прыжков, уклонений и других паркурных действий в console.txt."
 }
