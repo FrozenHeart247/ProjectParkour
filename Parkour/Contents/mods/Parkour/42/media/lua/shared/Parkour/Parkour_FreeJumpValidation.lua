@@ -5,6 +5,17 @@ ParkourFreeJumpValidation.MAX_DISTANCE = 4
 
 local DIAGONAL = 0.70710678118655
 local SAMPLE_STEP = 0.05
+local VEHICLE_PATH_HALF_WIDTH = 0.16
+local LANDING_VEHICLE_CLEARANCE = 0.10
+local MAX_ROUTE_VEHICLES = 1
+-- Vanilla passenger cars, SUVs, off-roaders and pickups top out around 0.70.
+-- Vans begin at 0.725, while ambulances and step vans are 0.89+, so 0.72 is
+-- an intentionally conservative line between a car and a tall vehicle.
+local MAX_JUMPABLE_VEHICLE_HEIGHT = 0.72
+local MAX_JUMPABLE_VEHICLE_WIDTH = 1.05
+local MAX_JUMPABLE_VEHICLE_LENGTH = 2.80
+local MAX_JUMPABLE_VEHICLE_SPEED_KMH = 0.50
+local MIN_UPRIGHT_VEHICLE_DOT = 0.90
 
 ParkourFreeJumpValidation.DIRECTIONS = {
     N = { dx = 0, dy = -1 },
@@ -21,6 +32,13 @@ local DIRECTION_ORDER = { "N", "NE", "E", "SE", "S", "SW", "W", "NW" }
 
 local function hasFlag(square, flag)
     return square and flag and square:has(flag) or false
+end
+
+local function debugLog(message)
+    local settings = SandboxVars and SandboxVars.Parkour
+    if settings and settings.DebugLogging then
+        print("[Parkour FreeJump Validation] " .. message)
+    end
 end
 
 local function isEnabled()
@@ -156,24 +174,171 @@ local function transitionIsClear(cell, fromX, fromY, toX, toY, z)
         and not edgeIsBlocked(vertical, toSquare)
 end
 
-local function routeIsClear(cell, startX, startY, targetX, targetY, z)
+local function collectVehicles(cell)
+    local vehicles = {}
+    local cellVehicles = cell and cell:getVehicles()
+    if not cellVehicles then
+        return vehicles
+    end
+
+    local vehicleIterator = cellVehicles:iterator()
+    while vehicleIterator:hasNext() do
+        vehicles[#vehicles + 1] = vehicleIterator:next()
+    end
+    return vehicles
+end
+
+local function vehicleIsJumpable(vehicle, z)
+    if not vehicle or math.floor(vehicle:getZ()) ~= z then
+        return false
+    end
+
+    local script = vehicle:getScript()
+    local extents = script and script:getExtents()
+    local modelScale = script and script:getModelScale() or 0
+    local width = extents and modelScale > 0 and extents:x() / modelScale or nil
+    local height = extents and modelScale > 0 and extents:y() / modelScale or nil
+    local length = extents and modelScale > 0 and extents:z() / modelScale or nil
+    if not width
+        or width > MAX_JUMPABLE_VEHICLE_WIDTH
+        or height > MAX_JUMPABLE_VEHICLE_HEIGHT
+        or length > MAX_JUMPABLE_VEHICLE_LENGTH then
+        if script and extents and modelScale > 0 then
+            debugLog(string.format(
+                "Vehicle %s blocked by normalized size %.3f x %.3f x %.3f (scale %.3f)",
+                tostring(script:getFullName()),
+                width,
+                height,
+                length,
+                modelScale
+            ))
+        else
+            debugLog("Vehicle blocked: missing script/extents/model scale")
+        end
+        return false
+    end
+
+    -- A vehicle is only a predictable obstacle while it is fully stationary,
+    -- upright and independent. Never jump a car carrying somebody or anything
+    -- that is towing/being towed; those can start moving during the animation.
+    if math.abs(vehicle:getCurrentSpeedKmHour())
+            > MAX_JUMPABLE_VEHICLE_SPEED_KMH
+        or vehicle:getUpVectorDot() < MIN_UPRIGHT_VEHICLE_DOT
+        or vehicle:getVehicleTowing()
+        or vehicle:getVehicleTowedBy() then
+        debugLog(string.format(
+            "Vehicle %s blocked by state speed=%.3f up=%.3f towing=%s towed=%s",
+            tostring(script:getFullName()),
+            vehicle:getCurrentSpeedKmHour(),
+            vehicle:getUpVectorDot(),
+            tostring(vehicle:getVehicleTowing() ~= nil),
+            tostring(vehicle:getVehicleTowedBy() ~= nil)
+        ))
+        return false
+    end
+
+    for seat = 0, vehicle:getMaxPassengers() - 1 do
+        if vehicle:getCharacter(seat) then
+            debugLog(string.format(
+                "Vehicle %s blocked: occupied seat %d",
+                tostring(script:getFullName()),
+                seat
+            ))
+            return false
+        end
+    end
+    return true
+end
+
+local function vehicleTouchesPath(vehicle, x, y, perpendicularX, perpendicularY)
+    if vehicle:isInBounds(x, y) then
+        return true
+    end
+
+    local offsetX = perpendicularX * VEHICLE_PATH_HALF_WIDTH
+    local offsetY = perpendicularY * VEHICLE_PATH_HALF_WIDTH
+    return vehicle:isInBounds(x + offsetX, y + offsetY)
+        or vehicle:isInBounds(x - offsetX, y - offsetY)
+end
+
+local function vehicleTouchesEndpoint(vehicle, x, y, z, clearance)
+    if not vehicle or math.floor(vehicle:getZ()) ~= z then
+        return false
+    end
+    if vehicle:isInBounds(x, y) then
+        return true
+    end
+
+    clearance = clearance or 0
+    if clearance <= 0 then
+        return false
+    end
+    return vehicle:isInBounds(x + clearance, y)
+        or vehicle:isInBounds(x - clearance, y)
+        or vehicle:isInBounds(x, y + clearance)
+        or vehicle:isInBounds(x, y - clearance)
+end
+
+local function anyVehicleTouchesEndpoint(vehicles, x, y, z, clearance)
+    for index = 1, #vehicles do
+        if vehicleTouchesEndpoint(vehicles[index], x, y, z, clearance) then
+            return true
+        end
+    end
+    return false
+end
+
+local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
     local deltaX = targetX - startX
     local deltaY = targetY - startY
     local length = math.sqrt(deltaX * deltaX + deltaY * deltaY)
     local samples = math.max(1, math.ceil(length / SAMPLE_STEP))
+    local perpendicularX = -deltaY / length
+    local perpendicularY = deltaX / length
+    vehicles = vehicles or collectVehicles(cell)
+    local routeVehicles = {}
+    local routeVehicleCount = 0
     local previousX = math.floor(startX)
     local previousY = math.floor(startY)
 
     for index = 1, samples do
         local progress = index / samples
-        local squareX = math.floor(startX + deltaX * progress)
-        local squareY = math.floor(startY + deltaY * progress)
+        local sampleX = startX + deltaX * progress
+        local sampleY = startY + deltaY * progress
+        local squareX = math.floor(sampleX)
+        local squareY = math.floor(sampleY)
+
+        -- Vehicle collision is evaluated against its rotated footprint rather
+        -- than the whole tile. Only one low, stationary vehicle may occupy the
+        -- route; source and landing tiles remain strictly vehicle-free.
+        for vehicleIndex = 1, #vehicles do
+            local vehicle = vehicles[vehicleIndex]
+            if math.floor(vehicle:getZ()) == z
+                and vehicleTouchesPath(
+                    vehicle,
+                    sampleX,
+                    sampleY,
+                    perpendicularX,
+                    perpendicularY
+                ) then
+                if not vehicleIsJumpable(vehicle, z) then
+                    return false
+                end
+                if not routeVehicles[vehicle] then
+                    routeVehicles[vehicle] = true
+                    routeVehicleCount = routeVehicleCount + 1
+                    if routeVehicleCount > MAX_ROUTE_VEHICLES then
+                        return false
+                    end
+                end
+            end
+        end
+
         if squareX ~= previousX or squareY ~= previousY then
             local crossedSquare = cell:getGridSquare(squareX, squareY, z)
             if not crossedSquare
                 or crossedSquare:HasStairs()
-                or crossedSquare:hasSlopedSurface()
-                or crossedSquare:isVehicleIntersecting() then
+                or crossedSquare:hasSlopedSurface() then
                 return false
             end
             if not transitionIsClear(
@@ -193,13 +358,19 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z)
     return true
 end
 
-local function isLandingSquareClear(square, allowedCharacter)
+local function isLandingSquareClear(
+    square,
+    allowedCharacter,
+    vehicles,
+    targetX,
+    targetY,
+    z
+)
     if not square
         or square:isSolid()
         or square:isSolidTrans()
         or square:HasStairs()
         or square:hasSlopedSurface()
-        or square:isVehicleIntersecting()
         or not square:TreatAsSolidFloor()
         or not square:canStand() then
         return false
@@ -212,6 +383,15 @@ local function isLandingSquareClear(square, allowedCharacter)
                 return false
             end
         end
+    end
+    if anyVehicleTouchesEndpoint(
+        vehicles,
+        targetX,
+        targetY,
+        z,
+        LANDING_VEHICLE_CLEARANCE
+    ) then
+        return false
     end
     return true
 end
@@ -288,8 +468,7 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
     local sourceSquare = cell:getGridSquare(originX, originY, originZ)
     if not sourceSquare
         or sourceSquare:HasStairs()
-        or sourceSquare:hasSlopedSurface()
-        or sourceSquare:isVehicleIntersecting() then
+        or sourceSquare:hasSlopedSurface() then
         return nil, "source"
     end
 
@@ -303,6 +482,10 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
     startY = tonumber(startY) or (originY + 0.5)
     if math.floor(startX) ~= originX or math.floor(startY) ~= originY then
         return nil, "origin-position"
+    end
+    local vehicles = collectVehicles(cell)
+    if anyVehicleTouchesEndpoint(vehicles, startX, startY, originZ, 0) then
+        return nil, "source-vehicle"
     end
 
     local rawTargetX = startX + direction.dx * distance
@@ -318,10 +501,25 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
         targetSquareY,
         originZ
     )
-    if not isLandingSquareClear(landingSquare, allowedCharacter) then
+    if not isLandingSquareClear(
+        landingSquare,
+        allowedCharacter,
+        vehicles,
+        targetX,
+        targetY,
+        originZ
+    ) then
         return nil, "landing"
     end
-    if not routeIsClear(cell, startX, startY, targetX, targetY, originZ) then
+    if not routeIsClear(
+        cell,
+        startX,
+        startY,
+        targetX,
+        targetY,
+        originZ,
+        vehicles
+    ) then
         return nil, "barrier"
     end
 
