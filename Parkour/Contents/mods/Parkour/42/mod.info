@@ -1,5 +1,5 @@
 name=Parkour Animation Test
 id=Parkour
-description=Adds custom parkour animations and an experimental directional dodge foundation.
-modversion=0.2.0
+description=Adds custom parkour animations, directional dodges, sprint window vaulting, and experimental roof climbing.
+modversion=0.4.0
 versionMin=42.20

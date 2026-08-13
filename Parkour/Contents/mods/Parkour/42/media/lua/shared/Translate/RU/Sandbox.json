@@ -25,6 +25,10 @@
     "Sandbox_Parkour_EnableDodgeSideFlipLeft_tooltip": "Разрешает выбирать Parkour_SideFlipDodgeLeft для уклонения влево.",
     "Sandbox_Parkour_EnableDodgeButterflyRight": "Включить Butterfly Dodge вправо",
     "Sandbox_Parkour_EnableDodgeButterflyRight_tooltip": "Разрешает выбирать Parkour_ButterflyDodgeRight для уклонения вправо.",
+    "Sandbox_Parkour_EnableSprintWindowVault": "Включить быстрый прыжок через окно",
+    "Sandbox_Parkour_EnableSprintWindowVault_tooltip": "Автоматически запускает Parkour_SprintWindowVault при столкновении в спринте с открытым или разбитым окном либо пустой оконной рамой.",
+    "Sandbox_Parkour_EnableWallRunUp": "Включить подъём на крышу",
+    "Sandbox_Parkour_EnableWallRunUp_tooltip": "Позволяет игрокам использовать Parkour_WallRunUp, чтобы взбежать по полноценной стене на свободную крышу этажом выше.",
     "Sandbox_Parkour_DebugLogging": "Записывать выбранную анимацию в лог",
     "Sandbox_Parkour_DebugLogging_tooltip": "Записывает выбранный вариант прыжка или уклонения в console.txt."
 }

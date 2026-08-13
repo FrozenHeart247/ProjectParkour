@@ -48,6 +48,22 @@ option Parkour.EnableVaultOver
     translation = Parkour_EnableVaultOver,
 }
 
+option Parkour.EnableSprintWindowVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableSprintWindowVault,
+}
+
+option Parkour.EnableWallRunUp
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableWallRunUp,
+}
+
 option Parkour.EnableDodgeDiveRollForward
 {
     type = boolean,

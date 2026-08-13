@@ -1,5 +1,8 @@
 {
     "UI_optionscreen_binding_ParkourDodge_Category": "Паркур",
     "UI_optionscreen_binding_ParkourDodge": "Уклонение",
-    "UI_optionscreen_binding_ParkourDodge_tooltip": "Обычное нажатие выполняет уклонение вперёд, а в боевой стойке — в выбранную сторону. По умолчанию клавиша не назначена."
+    "UI_optionscreen_binding_ParkourDodge_tooltip": "Обычное нажатие выполняет уклонение вперёд, а в боевой стойке — в выбранную сторону. По умолчанию клавиша не назначена.",
+    "UI_optionscreen_binding_ParkourWallRunUp": "Забраться на крышу",
+    "UI_optionscreen_binding_ParkourWallRunUp_tooltip": "Позволяет взбежать по полноценной стене и забраться на свободную крышу этажом выше. По умолчанию клавиша не назначена.",
+    "UI_Parkour_WallRunUp_Invalid": "Прямо впереди нет доступной крыши"
 }

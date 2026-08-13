@@ -127,6 +127,12 @@ local function onAIStateChange(character, currentState, previousState)
 
     local climbState = ClimbOverFenceState.instance()
     if currentState == climbState then
+        if character:getVariableBoolean("ParkourSprintWindowVault") then
+            character:setVariable(VARIANT_VARIABLE, "WindowVault")
+            debugLog("Selected sprint-window-vault variant")
+            return
+        end
+
         local outcome = character:getVariableString("ClimbFenceOutcome")
 
         if outcome == "success" and character:getVariableBoolean("VaultOverSprint") then
