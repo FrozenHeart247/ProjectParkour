@@ -9,7 +9,7 @@
 	<m_Looped>false</m_Looped>
 	<m_SpeedScale>1.00</m_SpeedScale>
 	<m_BlendTime>0.08</m_BlendTime>
-	<m_BlendOutTime>0.00</m_BlendOutTime>
+	<m_BlendOutTime>0.10</m_BlendOutTime>
 	<m_Conditions>
 		<m_Name>PerformingAction</m_Name>
 		<m_Type>STRING</m_Type>
@@ -22,7 +22,7 @@
 	</m_Events>
 	<m_Events>
 		<m_EventName>ParkourWallRunAirborne</m_EventName>
-		<m_TimePc>0.20</m_TimePc>
+		<m_TimePc>0.08</m_TimePc>
 		<m_ParameterValue></m_ParameterValue>
 	</m_Events>
 	<m_Events>

@@ -8,8 +8,8 @@ ISParkourWallRunUpAction = ISBaseTimedAction:derive("ISParkourWallRunUpAction")
 local MODULE = "ParkourWallRunUp"
 local ACTION_ANIMATION = "ParkourWallRunUp"
 local ANIMATION_START_TIMEOUT_MS = 600
-local ANIMATION_FAILSAFE_MS = 6200
-local NETWORK_REQUEST_LIFETIME_MS = 8200
+local ANIMATION_FAILSAFE_MS = 3200
+local NETWORK_REQUEST_LIFETIME_MS = 5500
 local ATTACK_TAIL_GUARD_MS = 1500
 
 local pendingNetworkRequests = {}

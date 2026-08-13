@@ -2,11 +2,11 @@ local Validation = require "Parkour/Parkour_WallRunUpValidation"
 local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
 
 local MODULE = "ParkourWallRunUp"
-local REQUEST_LIFETIME_MS = 7200
-local MIN_AIRBORNE_DELAY_MS = 800
-local MAX_AIRBORNE_DURATION_MS = 5000
+local REQUEST_LIFETIME_MS = 4500
+local MIN_AIRBORNE_DELAY_MS = 100
+local MAX_AIRBORNE_DURATION_MS = 2500
 local ATTACK_TAIL_GUARD_MS = 1500
-local MIN_TRANSFER_DELAY_MS = 2400
+local MIN_TRANSFER_DELAY_MS = 850
 local MAX_PATH_OVERSHOOT = 0.75
 local MAX_LATERAL_DEVIATION = 0.90
 local COOLDOWN_MS = 1000

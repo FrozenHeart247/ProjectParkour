@@ -238,14 +238,29 @@ function ParkourWallRunUpValidation.findTargetFromOrigin(
     local targetX = landingSquare:getX() + 0.5
     local targetY = landingSquare:getY() + 0.5
     if allowedCharacter then
-        -- Keep the coordinate parallel to the wall. Snapping both axes to the
-        -- tile centre creates a visible sideways twitch near corners.
+        local sourceFractionX = allowedCharacter:getX()
+            - math.floor(allowedCharacter:getX())
+        local sourceFractionY = allowedCharacter:getY()
+            - math.floor(allowedCharacter:getY())
+
+        -- The clip travels exactly one tile, so preserve the starting
+        -- sub-tile coordinate along the travel axis as well as the coordinate
+        -- parallel to the wall. Snapping the forward axis to 0.5 produces a
+        -- small second teleport after the visual motion has already stopped.
         if direction.dx ~= 0 then
+            targetX = landingSquare:getX() + math.max(
+                0.15,
+                math.min(0.85, sourceFractionX)
+            )
             targetY = math.max(
                 landingSquare:getY() + 0.15,
                 math.min(landingSquare:getY() + 0.85, allowedCharacter:getY())
             )
         else
+            targetY = landingSquare:getY() + math.max(
+                0.15,
+                math.min(0.85, sourceFractionY)
+            )
             targetX = math.max(
                 landingSquare:getX() + 0.15,
                 math.min(landingSquare:getX() + 0.85, allowedCharacter:getX())
