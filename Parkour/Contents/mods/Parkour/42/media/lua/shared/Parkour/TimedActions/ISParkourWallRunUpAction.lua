@@ -61,6 +61,14 @@ local function sendCancel(action)
     })
 end
 
+local function startApprovedAnimation(action)
+    if action.animationRequestedAt then
+        return
+    end
+    action.animationRequestedAt = getTimestampMs()
+    action:setActionAnim(ACTION_ANIMATION)
+end
+
 local function beginAttackTailGuard(action)
     if action.attackTailStarted then
         return
@@ -136,13 +144,15 @@ function ISParkourWallRunUpAction:start()
     self.character:setIsAiming(false)
     self.character:setIgnoreMovement(true)
     self.ownsMovementLock = true
-    self:setActionAnim(ACTION_ANIMATION)
 
     pendingNetworkRequests[self.requestId] = {
         action = self,
         expiresAt = self.startedAt + NETWORK_REQUEST_LIFETIME_MS,
     }
     sendBegin(self)
+    if not isClient() then
+        startApprovedAnimation(self)
+    end
     debugLog(string.format(
         "Started request %s from %d,%d,%d toward %s",
         tostring(self.requestId),
@@ -162,8 +172,14 @@ function ISParkourWallRunUpAction:update()
     self.character:setMetabolicTarget(Metabolics.JumpFence)
 
     local now = getTimestampMs()
+    if isClient() and not self.serverApproved then
+        return
+    end
+    if not self.animationRequestedAt then
+        startApprovedAnimation(self)
+    end
     if not self.animationStarted then
-        if now - self.startedAt >= ANIMATION_START_TIMEOUT_MS then
+        if now - self.animationRequestedAt >= ANIMATION_START_TIMEOUT_MS then
             self.invalid = true
             debugLog("Animation start timeout for request " .. tostring(self.requestId))
             self:forceComplete()
@@ -296,6 +312,7 @@ function ISParkourWallRunUpAction.onServerCommand(module, command, args)
 
     if command == "BeginAccepted" then
         action.serverApproved = true
+        startApprovedAnimation(action)
         debugLog("Server approved " .. tostring(args.requestId))
     elseif command == "AirborneAccepted" then
         action.airborneServerApproved = true
@@ -355,6 +372,7 @@ function ISParkourWallRunUpAction:new(character, target)
     action.requestId = allocateRequestId()
     action.invalid = false
     action.animationStarted = false
+    action.animationRequestedAt = nil
     action.animationStartedAt = nil
     action.animationDone = false
     action.airborne = false

@@ -7,7 +7,8 @@ local MIN_AIRBORNE_DELAY_MS = 800
 local MAX_AIRBORNE_DURATION_MS = 5000
 local ATTACK_TAIL_GUARD_MS = 1500
 local MIN_TRANSFER_DELAY_MS = 2400
-local MAX_ORIGIN_DISTANCE = 2.75
+local MAX_PATH_OVERSHOOT = 0.75
+local MAX_LATERAL_DEVIATION = 0.90
 local COOLDOWN_MS = 1000
 
 local pendingByPlayer = setmetatable({}, { __mode = "k" })
@@ -35,6 +36,21 @@ local function isValidRequestId(value)
         and value < 9007199254740991
 end
 
+local function isInsideMovementCorridor(player, request)
+    local direction = Validation.DIRECTIONS[request.directionName]
+    if not direction then
+        return false
+    end
+
+    local dx = player:getX() - (request.originX + 0.5)
+    local dy = player:getY() - (request.originY + 0.5)
+    local forward = dx * direction.dx + dy * direction.dy
+    local lateral = math.abs(dx * -direction.dy + dy * direction.dx)
+    return forward >= -MAX_PATH_OVERSHOOT
+        and forward <= Validation.TRAVEL_TILES + MAX_PATH_OVERSHOOT
+        and lateral <= MAX_LATERAL_DEVIATION
+end
+
 local function beginRequest(player, args)
     local requestId = args and args.requestId
     if not player or not isValidRequestId(requestId) then
@@ -42,7 +58,12 @@ local function beginRequest(player, args)
     end
 
     local now = getTimestampMs()
-    if player:isDead() or player:getVehicle() or now < (cooldownByPlayer[player] or 0) then
+    if player:isDead()
+        or player:getVehicle()
+        or player:isOnFloor()
+        or player:hasHitReaction()
+        or pendingByPlayer[player] ~= nil
+        or now < (cooldownByPlayer[player] or 0) then
         reject(player, requestId, "Begin", "character")
         return
     end
@@ -57,8 +78,8 @@ local function beginRequest(player, args)
         return
     end
 
-    local facingName, facingAlignment = Validation.resolveFacing(player)
-    if facingName ~= args.directionName or facingAlignment < 0.70 then
+    local facingAlignment = Validation.getDirectionAlignment(player, args.directionName)
+    if facingAlignment < 0.70 then
         reject(player, requestId, "Begin", "facing")
         return
     end
@@ -111,14 +132,12 @@ local function beginAirborneRequest(player, args)
     end
 
     local now = getTimestampMs()
-    local dx = player:getX() - (request.originX + 0.5)
-    local dy = player:getY() - (request.originY + 0.5)
     if player:isDead()
         or player:getVehicle()
         or now < request.startedAt + MIN_AIRBORNE_DELAY_MS
         or now > request.expiresAt
         or math.floor(player:getZ()) ~= request.originZ
-        or dx * dx + dy * dy > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE then
+        or not isInsideMovementCorridor(player, request) then
         reject(player, requestId, "Airborne", "timing")
         return
     end
@@ -181,9 +200,7 @@ local function completeRequest(player, args)
         return
     end
 
-    local dx = player:getX() - (request.originX + 0.5)
-    local dy = player:getY() - (request.originY + 0.5)
-    if dx * dx + dy * dy > MAX_ORIGIN_DISTANCE * MAX_ORIGIN_DISTANCE then
+    if not isInsideMovementCorridor(player, request) then
         reject(player, requestId, "Transfer", "distance")
         return
     end
