@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animNode x_extends="vaultOverSprint.xml">
 	<m_Name>vaultOverSprint</m_Name>
+	<m_Priority>20</m_Priority>
+	<m_ConditionPriority>20</m_ConditionPriority>
 	<m_AnimName>Parkour_SpeedVault</m_AnimName>
 	<m_SpeedScale>1.0</m_SpeedScale>
 	<m_Conditions x_name="c9278901-c1ed-4c54-8c25-3868f5e50a04">

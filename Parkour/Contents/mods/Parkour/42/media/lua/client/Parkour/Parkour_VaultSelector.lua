@@ -7,7 +7,9 @@ local VANILLA_VARIANT = "Vanilla"
 -- 1. Put its GLB into media/anims_X/Bob.
 -- 2. Add its Sandbox option to media/sandbox-options.txt.
 -- 3. Add one entry here.
--- 4. Add the matching conditioned AnimNode files.
+-- 4. Add the matching conditioned AnimNode files. New vault variants should
+--    inherit or declare Priority/ConditionPriority 20 so sex-specific vanilla
+--    animation packs cannot win an otherwise equal AnimNode match.
 local RUN_VARIANTS = {
     { id = "FrontFlip", sandboxKey = "EnableFrontFlip" },
     { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault" },

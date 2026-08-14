@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animNode x_extends="vaultOverRun.xml">
 	<m_Name>vaultOverRun</m_Name>
+	<m_Priority>3</m_Priority>
+	<m_ConditionPriority>3</m_ConditionPriority>
 	<m_AnimName>Bob_ValultOver_Run</m_AnimName>
 	<m_SpeedScale>0.80</m_SpeedScale>
 	<m_BlendOutTime>0.35</m_BlendOutTime>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animNode>
 	<m_Name>vaultOverRunFail</m_Name>
-	<m_Priority>6</m_Priority>
+	<m_Priority>20</m_Priority>
+	<m_ConditionPriority>20</m_ConditionPriority>
 	<m_AnimName>Parkour_VaultStumble</m_AnimName>
 	<m_Looped>false</m_Looped>
 	<m_BlendTime>0.05</m_BlendTime>
