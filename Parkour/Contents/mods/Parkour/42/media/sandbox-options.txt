@@ -32,6 +32,14 @@ option Parkour.EnableDiveRoll
     translation = Parkour_EnableDiveRoll,
 }
 
+option Parkour.EnableBackflipVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableBackflipVault,
+}
+
 option Parkour.EnableSpeedVault
 {
     type = boolean,

@@ -15,6 +15,7 @@ local RUN_VARIANTS = {
     { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault" },
     { id = "DashVault", sandboxKey = "EnableDashVault" },
     { id = "DiveRoll", sandboxKey = "EnableDiveRoll" },
+    { id = "BackflipVault", sandboxKey = "EnableBackflipVault" },
 }
 
 local SPRINT_VARIANTS = {

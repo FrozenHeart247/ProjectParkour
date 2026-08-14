@@ -9,6 +9,8 @@
     "Sandbox_Parkour_EnableDashVault_tooltip": "Allows Parkour_DashVault to be selected for a successful running vault over a low fence.",
     "Sandbox_Parkour_EnableDiveRoll": "Enable Dive Roll",
     "Sandbox_Parkour_EnableDiveRoll_tooltip": "Allows Parkour_DiveRoll to be selected for a successful running vault over a low fence.",
+    "Sandbox_Parkour_EnableBackflipVault": "Enable Backflip Vault",
+    "Sandbox_Parkour_EnableBackflipVault_tooltip": "Allows Parkour_BackflipVault to be selected for a successful running vault over a low fence.",
     "Sandbox_Parkour_EnableSpeedVault": "Enable Speed Vault",
     "Sandbox_Parkour_EnableSpeedVault_tooltip": "Allows Parkour_SpeedVault to be selected for a successful sprint vault over a low fence.",
     "Sandbox_Parkour_EnableVaultOver": "Enable Vault Over",
