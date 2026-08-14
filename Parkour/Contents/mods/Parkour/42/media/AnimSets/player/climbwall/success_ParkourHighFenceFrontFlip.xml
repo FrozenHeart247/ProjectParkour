@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>success</m_Name>
+	<m_Priority>20</m_Priority>
+	<m_ConditionPriority>20</m_ConditionPriority>
+	<m_AnimName>Parkour_HighFenceFrontFlip_Success</m_AnimName>
+	<m_Looped>false</m_Looped>
+	<m_BlendTime>0.05</m_BlendTime>
+	<m_BlendOutTime>0.20</m_BlendOutTime>
+	<m_SpeedScale>1.35</m_SpeedScale>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_Conditions x_name="parkour-high-fence-success-started">
+		<m_Name>ClimbFenceStarted</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="parkour-high-fence-success-outcome">
+		<m_Name>ClimbFenceOutcome</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>success</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="parkour-high-fence-success-struggle">
+		<m_Name>ClimbFenceStruggle</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="parkour-high-fence-variant-success">
+		<m_Name>ParkourHighFenceVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>HighFenceFrontFlip</m_Value>
+	</m_Conditions>
+	<m_Events x_name="parkour-high-fence-success-finished">
+		<m_EventName>SetVariable</m_EventName>
+		<m_Time>End</m_Time>
+		<m_ParameterValue>ClimbFenceFinished=true</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-success-sound">
+		<m_EventName>PlayFenceSound</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>ClimbOverFenceHighSuccess</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-land">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.62</m_TimePc>
+		<m_ParameterValue>LandHeavy</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-ready-run">
+		<m_EventName>SetVariable</m_EventName>
+		<m_TimePc>0.75</m_TimePc>
+		<m_ParameterValue>ClimbFenceReadyToRun=true</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-clear-run-start">
+		<m_EventName>SetVariable</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>ClimbFenceReadyToRun=false</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-voice">
+		<m_EventName>PlayerVoiceSound</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>JumpHigh</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="parkour-high-fence-clear-run-end">
+		<m_EventName>SetVariable</m_EventName>
+		<m_Time>End</m_Time>
+		<m_ParameterValue>ClimbFenceReadyToRun=false</m_ParameterValue>
+	</m_Events>
+</animNode>

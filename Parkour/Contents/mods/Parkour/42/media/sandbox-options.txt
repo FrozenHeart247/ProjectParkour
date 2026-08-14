@@ -56,6 +56,22 @@ option Parkour.EnableReverseVault
     translation = Parkour_EnableReverseVault,
 }
 
+option Parkour.EnableHighFenceFrontFlip
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableHighFenceFrontFlip,
+}
+
+option Parkour.EnableHighFenceVault02
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableHighFenceVault02,
+}
+
 option Parkour.EnableSprintWindowVault
 {
     type = boolean,
