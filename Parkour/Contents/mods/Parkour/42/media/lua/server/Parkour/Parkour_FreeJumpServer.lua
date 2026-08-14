@@ -3,6 +3,7 @@ local Validation = require "Parkour/Parkour_FreeJumpValidation"
 local MODULE = "ParkourFreeJump"
 local REQUEST_LIFETIME_MS = 4000
 local MIN_TRANSFER_DELAY_MS = 650
+local MIN_DEFERRED_TRANSFER_DELAY_MS = 300
 local MAX_PATH_OVERSHOOT = 0.75
 local MAX_LATERAL_DEVIATION = 0.90
 local COOLDOWN_MS = 800
@@ -108,7 +109,8 @@ local function beginRequest(player, args)
         return
     end
     if target.landingSquare:getX() ~= math.floor(tonumber(args.landingSquareX) or -1000000)
-        or target.landingSquare:getY() ~= math.floor(tonumber(args.landingSquareY) or -1000000) then
+        or target.landingSquare:getY() ~= math.floor(tonumber(args.landingSquareY) or -1000000)
+        or target.landingSquare:getZ() ~= math.floor(tonumber(args.landingSquareZ) or -1000000) then
         reject(player, requestId, "Begin", "landing")
         return
     end
@@ -124,6 +126,7 @@ local function beginRequest(player, args)
         distance = distance,
         startX = target.startX,
         startY = target.startY,
+        requiresDeferredTransfer = target.requiresDeferredTransfer == true,
     }
     cooldownByPlayer[player] = now + COOLDOWN_MS
     sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
@@ -142,11 +145,15 @@ local function completeRequest(player, args)
     pendingByPlayer[player] = nil
 
     local now = getTimestampMs()
+    local minimumTransferDelay = MIN_TRANSFER_DELAY_MS
+    if request.requiresDeferredTransfer then
+        minimumTransferDelay = MIN_DEFERRED_TRANSFER_DELAY_MS
+    end
     if player:isDead()
         or player:getVehicle()
         or player:isOnFloor()
         or player:hasHitReaction()
-        or now < request.startedAt + MIN_TRANSFER_DELAY_MS
+        or now < request.startedAt + minimumTransferDelay
         or now > request.expiresAt
         or math.floor(player:getZ()) ~= request.originZ then
         rollbackRequest(player, request, "timing")
@@ -194,6 +201,8 @@ local function completeRequest(player, args)
         x = transferX,
         y = transferY,
         z = target.targetZ,
+        landingZ = target.landingZ,
+        dropLanding = target.dropLanding == true,
     })
     debugLog("Transferred request " .. tostring(requestId))
 end

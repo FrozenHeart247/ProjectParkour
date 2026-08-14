@@ -60,6 +60,11 @@ local function isHardForcedState(character)
         or isCurrentState(character, GrappledThrownOverFenceState)
 end
 
+local function isFallingState(character)
+    return character:isbFalling()
+        or isCurrentState(character, PlayerFallingState)
+end
+
 local function isForcedPlayerState(character)
     return isEscapableReactionState(character) or isHardForcedState(character)
 end
@@ -533,7 +538,12 @@ function ISParkourDodgeAction:releaseControl()
         -- canStart() guarantees that IgnoreMovement was false before the
         -- dodge. If a hit reaction interrupted us, that state now owns the
         -- lock and will release it on exit; otherwise release our lock here.
-        if not isForcedPlayerState(self.character) then
+        -- Falling after a roof-edge dodge does not own the lock that this
+        -- action set in start(). Leaving it enabled permanently blocks input
+        -- and preserves the last locomotion vector. Other forced reactions
+        -- keep their own lock and release it through their normal state exit.
+        if not isForcedPlayerState(self.character)
+            or isFallingState(self.character) then
             self.character:setIgnoreMovement(false)
         end
         self.ownsMovementLock = false

@@ -144,6 +144,68 @@ local function edgeIsBlocked(fromSquare, toSquare)
     return false
 end
 
+local function airEdgeIsBlocked(fromSquare, toSquare, dx, dy)
+    -- Empty upper levels frequently have no IsoGridSquare at all. Inspect the
+    -- real side of the edge when one exists instead of treating missing air as
+    -- an opaque wall.
+    local edgeSquare
+    local north
+    if dx < 0 then
+        edgeSquare = fromSquare
+        north = false
+    elseif dx > 0 then
+        edgeSquare = toSquare
+        north = false
+    elseif dy < 0 then
+        edgeSquare = fromSquare
+        north = true
+    else
+        edgeSquare = toSquare
+        north = true
+    end
+    if not edgeSquare then
+        return false
+    end
+
+    local lowFence
+    local tallFence
+    local window
+    local door
+    if north then
+        lowFence = hasFlag(edgeSquare, IsoFlagType.HoppableN)
+        tallFence = hasFlag(edgeSquare, IsoFlagType.TallHoppableN)
+        window = hasFlag(edgeSquare, IsoFlagType.WindowN)
+            or hasFlag(edgeSquare, IsoFlagType.windowN)
+        door = hasFlag(edgeSquare, IsoFlagType.DoorWallN)
+            or hasFlag(edgeSquare, IsoFlagType.doorN)
+        if lowFence then
+            return false
+        end
+        return tallFence or window or door
+            or hasFlag(edgeSquare, IsoFlagType.collideN)
+            or hasFlag(edgeSquare, IsoFlagType.cutN)
+            or hasFlag(edgeSquare, IsoFlagType.WallN)
+            or hasFlag(edgeSquare, IsoFlagType.WallNTrans)
+            or hasFlag(edgeSquare, IsoFlagType.WallNW)
+    end
+
+    lowFence = hasFlag(edgeSquare, IsoFlagType.HoppableW)
+    tallFence = hasFlag(edgeSquare, IsoFlagType.TallHoppableW)
+    window = hasFlag(edgeSquare, IsoFlagType.WindowW)
+        or hasFlag(edgeSquare, IsoFlagType.windowW)
+    door = hasFlag(edgeSquare, IsoFlagType.DoorWallW)
+        or hasFlag(edgeSquare, IsoFlagType.doorW)
+    if lowFence then
+        return false
+    end
+    return tallFence or window or door
+        or hasFlag(edgeSquare, IsoFlagType.collideW)
+        or hasFlag(edgeSquare, IsoFlagType.cutW)
+        or hasFlag(edgeSquare, IsoFlagType.WallW)
+        or hasFlag(edgeSquare, IsoFlagType.WallWTrans)
+        or hasFlag(edgeSquare, IsoFlagType.WallNW)
+end
+
 local function transitionIsClear(cell, fromX, fromY, toX, toY, z)
     local dx = toX - fromX
     local dy = toY - fromY
@@ -154,7 +216,16 @@ local function transitionIsClear(cell, fromX, fromY, toX, toY, z)
     local fromSquare = cell:getGridSquare(fromX, fromY, z)
     local toSquare = cell:getGridSquare(toX, toY, z)
     if not fromSquare or not toSquare then
-        return false
+        if dx == 0 or dy == 0 then
+            return not airEdgeIsBlocked(fromSquare, toSquare, dx, dy)
+        end
+
+        local horizontal = cell:getGridSquare(fromX + dx, fromY, z)
+        local vertical = cell:getGridSquare(fromX, fromY + dy, z)
+        return not airEdgeIsBlocked(fromSquare, horizontal, dx, 0)
+            and not airEdgeIsBlocked(fromSquare, vertical, 0, dy)
+            and not airEdgeIsBlocked(horizontal, toSquare, 0, dy)
+            and not airEdgeIsBlocked(vertical, toSquare, dx, 0)
     end
 
     if dx == 0 or dy == 0 then
@@ -298,6 +369,7 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
     vehicles = vehicles or collectVehicles(cell)
     local routeVehicles = {}
     local routeVehicleCount = 0
+    local crossesUnsupportedFloor = false
     local previousX = math.floor(startX)
     local previousY = math.floor(startY)
 
@@ -307,6 +379,10 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
         local sampleY = startY + deltaY * progress
         local squareX = math.floor(sampleX)
         local squareY = math.floor(sampleY)
+        local sampleSquare = cell:getGridSquare(squareX, squareY, z)
+        if not sampleSquare or not sampleSquare:TreatAsSolidFloor() then
+            crossesUnsupportedFloor = true
+        end
 
         -- Vehicle collision is evaluated against its rotated footprint rather
         -- than the whole tile. Only one low, stationary vehicle may occupy the
@@ -322,13 +398,13 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
                     perpendicularY
                 ) then
                 if not vehicleIsJumpable(vehicle, z) then
-                    return false
+                    return false, false
                 end
                 if not routeVehicles[vehicle] then
                     routeVehicles[vehicle] = true
                     routeVehicleCount = routeVehicleCount + 1
                     if routeVehicleCount > MAX_ROUTE_VEHICLES then
-                        return false
+                        return false, false
                     end
                 end
             end
@@ -336,10 +412,11 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
 
         if squareX ~= previousX or squareY ~= previousY then
             local crossedSquare = cell:getGridSquare(squareX, squareY, z)
-            if not crossedSquare
-                or crossedSquare:HasStairs()
-                or crossedSquare:hasSlopedSurface() then
-                return false
+            if crossedSquare and (
+                crossedSquare:HasStairs()
+                or crossedSquare:hasSlopedSurface()
+            ) then
+                return false, false
             end
             if not transitionIsClear(
                 cell,
@@ -349,13 +426,13 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
                 squareY,
                 z
             ) then
-                return false
+                return false, false
             end
             previousX = squareX
             previousY = squareY
         end
     end
-    return true
+    return true, crossesUnsupportedFloor
 end
 
 local function isLandingSquareClear(
@@ -394,6 +471,70 @@ local function isLandingSquareClear(
         return false
     end
     return true
+end
+
+local function isAirEndpointClear(square, allowedCharacter, vehicles, x, y, z)
+    -- A missing IsoGridSquare on an upper level is ordinary empty air, not an
+    -- invalid destination. Only an existing blocking square rejects the drop.
+    if square and (
+        square:isSolid()
+        or square:isSolidTrans()
+        or square:HasStairs()
+        or square:hasSlopedSurface()
+        or square:TreatAsSolidFloor()
+    ) then
+        return false
+    end
+
+    local movingObjects = square and square:getMovingObjects()
+    if movingObjects then
+        for index = 0, movingObjects:size() - 1 do
+            if movingObjects:get(index) ~= allowedCharacter then
+                return false
+            end
+        end
+    end
+    return not anyVehicleTouchesEndpoint(
+        vehicles,
+        x,
+        y,
+        z,
+        LANDING_VEHICLE_CLEARANCE
+    )
+end
+
+local function findLowerLanding(
+    cell,
+    x,
+    y,
+    originZ,
+    allowedCharacter,
+    vehicles
+)
+    local squareX = math.floor(x)
+    local squareY = math.floor(y)
+    for z = originZ - 1, 0, -1 do
+        local square = cell:getGridSquare(squareX, squareY, z)
+        if square and square:TreatAsSolidFloor() then
+            if isLandingSquareClear(
+                square,
+                allowedCharacter,
+                vehicles,
+                x,
+                y,
+                z
+            ) then
+                return square
+            end
+            -- A blocked floor catches the fall; do not search through it for a
+            -- second floor farther below.
+            return nil
+        end
+        if square and (square:isSolid() or square:isSolidTrans()) then
+            return nil
+        end
+    end
+    return nil
 end
 
 function ParkourFreeJumpValidation.getPreferredDistance(character)
@@ -496,22 +637,50 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
     -- client/server floating-point differences from selecting adjacent tiles.
     local targetX = math.max(targetSquareX + 0.10, math.min(rawTargetX, targetSquareX + 0.90))
     local targetY = math.max(targetSquareY + 0.10, math.min(rawTargetY, targetSquareY + 0.90))
-    local landingSquare = cell:getGridSquare(
+    local sameLevelSquare = cell:getGridSquare(
         targetSquareX,
         targetSquareY,
         originZ
     )
+    local landingSquare = sameLevelSquare
+    local dropLanding = false
     if not isLandingSquareClear(
-        landingSquare,
+        sameLevelSquare,
         allowedCharacter,
         vehicles,
         targetX,
         targetY,
         originZ
     ) then
-        return nil, "landing"
+        -- An existing but unsafe same-level floor must still block the jump.
+        -- Only a genuinely open edge may fall through to a clear floor below.
+        if sameLevelSquare and sameLevelSquare:TreatAsSolidFloor() then
+            return nil, "landing"
+        end
+        if not isAirEndpointClear(
+            sameLevelSquare,
+            allowedCharacter,
+            vehicles,
+            targetX,
+            targetY,
+            originZ
+        ) then
+            return nil, "landing"
+        end
+        landingSquare = findLowerLanding(
+            cell,
+            targetX,
+            targetY,
+            originZ,
+            allowedCharacter,
+            vehicles
+        )
+        if not landingSquare then
+            return nil, "landing"
+        end
+        dropLanding = true
     end
-    if not routeIsClear(
+    local routeClear, requiresDeferredTransfer = routeIsClear(
         cell,
         startX,
         startY,
@@ -519,7 +688,8 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
         targetY,
         originZ,
         vehicles
-    ) then
+    )
+    if not routeClear then
         return nil, "barrier"
     end
 
@@ -531,7 +701,12 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
         startY = startY,
         targetX = targetX,
         targetY = targetY,
+        -- Movement remains at the take-off Z for the authored horizontal arc.
+        -- For a roof drop, vanilla falling begins only after the final event.
         targetZ = originZ,
+        landingZ = landingSquare:getZ(),
+        dropLanding = dropLanding,
+        requiresDeferredTransfer = requiresDeferredTransfer,
         distance = distance,
         directionName = directionName,
         direction = direction,

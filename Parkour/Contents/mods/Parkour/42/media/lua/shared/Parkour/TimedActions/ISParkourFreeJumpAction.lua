@@ -7,6 +7,7 @@ ISParkourFreeJumpAction = ISBaseTimedAction:derive("ISParkourFreeJumpAction")
 local MODULE = "ParkourFreeJump"
 local ACTION_ANIMATION = "ParkourFreeJump"
 local DISTANCE_VARIABLE = "ParkourFreeJumpDistance"
+local DEFERRED_VARIABLE = "ParkourFreeJumpDeferred"
 local ANIMATION_START_TIMEOUT_MS = 600
 local ANIMATION_FAILSAFE_MS = 2300
 local NETWORK_REQUEST_LIFETIME_MS = 6000
@@ -14,6 +15,12 @@ local NETWORK_REQUEST_LIFETIME_MS = 6000
 -- Translation Data is intentionally removed from the exported clips; this
 -- controller is the single owner of the character's world X/Y during a jump.
 local MOVEMENT_DURATION_MS = 1000
+-- B42 enters PlayerFallingState after roughly half a second without a floor,
+-- even when fallTime and logical Z are continuously held. Finish the approved
+-- horizontal crossing before that threshold and then hand control to vanilla
+-- falling at the endpoint.
+local DEFERRED_TAKEOFF_DURATION_MS = 120
+local DEFERRED_MOVEMENT_DURATION_MS = 400
 
 local pendingNetworkRequests = {}
 local nextRequestId = 1
@@ -38,6 +45,11 @@ local function isForcedPlayerState(character)
         or isCurrentState(character, VehicleCollisionMinorStaggerState)
         or isCurrentState(character, VehicleCollisionOnGroundState)
         or isCurrentState(character, VehicleCollisionState)
+end
+
+local function isFallingState(character)
+    return character:isbFalling()
+        or isCurrentState(character, PlayerFallingState)
 end
 
 local function debugLog(message)
@@ -68,6 +80,7 @@ local function sendBegin(action)
         distance = action.target.distance,
         landingSquareX = action.target.landingSquare:getX(),
         landingSquareY = action.target.landingSquare:getY(),
+        landingSquareZ = action.target.landingSquare:getZ(),
     })
 end
 
@@ -86,6 +99,29 @@ local function startApprovedAnimation(action)
     end
     action.animationRequestedAt = getTimestampMs()
     action:setActionAnim(ACTION_ANIMATION)
+end
+
+local function stabilizeDeferredMovement(action)
+    if not action.target.requiresDeferredTransfer or action.transferred then
+        return
+    end
+
+    local character = action.character
+    character:setFallTime(0)
+    character:setZ(action.target.originZ)
+    character:setLastZ(action.target.originZ)
+    character:setbFalling(false)
+
+    local currentSquare = character:getCurrentSquare()
+    if currentSquare and currentSquare ~= action.lastKnownSquare then
+        -- Build 42's jump implementation uses this when crossing a loaded air
+        -- square. It initializes the surrounding square references without
+        -- creating a fake floor or modifying the map.
+        if not currentSquare:hasFloor() then
+            currentSquare:EnsureSurroundNotNull()
+        end
+        action.lastKnownSquare = currentSquare
+    end
 end
 
 local function performLocalTransfer(action)
@@ -117,6 +153,7 @@ local function performLocalTransfer(action)
         target.targetY,
         target.targetZ
     )
+    action.dropLanding = target.dropLanding == true
     action.transferred = true
     return true
 end
@@ -125,18 +162,45 @@ local function updateProgressiveMovement(action, now)
     if not action.animationStarted or action.transferred then
         return
     end
+    local movementStartedAt = action.animationStartedAt
+    local movementDuration = MOVEMENT_DURATION_MS
+    if action.target.requiresDeferredTransfer then
+        -- Let the first jump frames read as a take-off while the character is
+        -- still supported by the roof. The actual air-square crossing keeps
+        -- its proven 400 ms window, so slowing the visible clip does not bring
+        -- back PlayerFallingState before the endpoint.
+        movementStartedAt = movementStartedAt + DEFERRED_TAKEOFF_DURATION_MS
+        movementDuration = DEFERRED_MOVEMENT_DURATION_MS
+    end
+    local linearProgress = (now - movementStartedAt) / movementDuration
+    if linearProgress < 0 then
+        linearProgress = 0
+    elseif linearProgress > 1 then
+        linearProgress = 1
+    end
 
-    local progress = (now - action.animationStartedAt) / MOVEMENT_DURATION_MS
-    if progress < 0 then
-        progress = 0
-    elseif progress > 1 then
-        progress = 1
+    local progress = linearProgress
+    if action.target.requiresDeferredTransfer then
+        -- Smoothstep keeps the same safe crossing duration, but removes the
+        -- velocity snap after take-off and the hard stop before vanilla fall.
+        progress = linearProgress * linearProgress * (3 - 2 * linearProgress)
     end
 
     local desiredX = action.target.startX
         + (action.target.targetX - action.target.startX) * progress
     local desiredY = action.target.startY
         + (action.target.targetY - action.target.startY) * progress
+    if action.target.requiresDeferredTransfer then
+        local cell = getCell()
+        local destinationSquare = cell and cell:getGridSquare(
+            math.floor(desiredX),
+            math.floor(desiredY),
+            action.target.originZ
+        )
+        if destinationSquare and not destinationSquare:hasFloor() then
+            destinationSquare:EnsureSurroundNotNull()
+        end
+    end
     -- Direct position updates deliberately bypass the collision response of
     -- the low fence/furniture that was approved by the route validator. Do not
     -- overwrite LastX/LastY every frame: those values carry the movement delta
@@ -144,7 +208,21 @@ local function updateProgressiveMovement(action, now)
     -- an abort rollback) synchronizes both current and last coordinates once.
     action.character:setX(desiredX)
     action.character:setY(desiredY)
+    if action.target.requiresDeferredTransfer then
+        -- Match the current B42 Jump implementation while crossing an air
+        -- square. Keeping Last* synchronized prevents the engine from treating
+        -- the controlled horizontal displacement as an accumulated fall.
+        action.character:setLastX(desiredX)
+        action.character:setLastY(desiredY)
+        action.character:setLastZ(action.target.originZ)
+    end
     action.movementProgress = progress
+
+    if action.target.requiresDeferredTransfer
+        and linearProgress >= 1
+        and not action.transferRequested then
+        action:requestTransfer()
+    end
 end
 
 local function rollbackIncompleteMovement(action)
@@ -221,12 +299,24 @@ function ISParkourFreeJumpAction:start()
     self.action:setUseProgressBar(false)
     self.startedAt = getTimestampMs()
     self.character:setVariable(DISTANCE_VARIABLE, tostring(self.target.distance))
+    self.character:setVariable(
+        DEFERRED_VARIABLE,
+        tostring(self.target.requiresDeferredTransfer == true)
+    )
     self.character:setForwardDirection(self.facingX, self.facingY)
     self.character:setRunning(false)
     self.character:setSprinting(false)
     self.character:setIsAiming(false)
     self.character:setIgnoreMovement(true)
     self.ownsMovementLock = true
+    if self.target.requiresDeferredTransfer then
+        self.lastKnownSquare = self.character:getCurrentSquare()
+        self.fallGuardCallback = function()
+            stabilizeDeferredMovement(self)
+        end
+        Events.OnTick.Add(self.fallGuardCallback)
+        stabilizeDeferredMovement(self)
+    end
 
     pendingNetworkRequests[self.requestId] = {
         action = self,
@@ -237,14 +327,18 @@ function ISParkourFreeJumpAction:start()
         startApprovedAnimation(self)
     end
     debugLog(string.format(
-        "Started request %s: %s, %d tiles",
+        "Started request %s: %s, %d tiles; drop=%s landingZ=%d deferred=%s",
         tostring(self.requestId),
         self.target.directionName,
-        self.target.distance
+        self.target.distance,
+        tostring(self.target.dropLanding == true),
+        self.target.landingZ,
+        tostring(self.target.requiresDeferredTransfer == true)
     ))
 end
 
 function ISParkourFreeJumpAction:update()
+    stabilizeDeferredMovement(self)
     if isForcedPlayerState(self.character) then
         self.invalid = true
         debugLog("Interrupted by forced player state: " .. tostring(self.character:getCurrentState()))
@@ -307,6 +401,13 @@ function ISParkourFreeJumpAction:requestTransfer()
     else
         pendingNetworkRequests[self.requestId] = nil
         debugLog("Local transfer completed " .. tostring(self.requestId))
+        if self.target.requiresDeferredTransfer then
+            -- Transfer is already at 99% of the clip. Finish immediately so
+            -- the next engine update can enter vanilla falling without this
+            -- action reasserting IgnoreMovement.
+            self.animationDone = true
+            self:forceComplete()
+        end
     end
 end
 
@@ -340,12 +441,19 @@ function ISParkourFreeJumpAction:releaseControl()
         return
     end
     self.controlReleased = true
+    if self.fallGuardCallback then
+        Events.OnTick.Remove(self.fallGuardCallback)
+        self.fallGuardCallback = nil
+    end
     rollbackIncompleteMovement(self)
     self.character:clearVariable(DISTANCE_VARIABLE)
+    self.character:clearVariable(DEFERRED_VARIABLE)
     if self.ownsMovementLock then
         -- A hit/fall state owns its own movement lock. Do not clear that lock
         -- when the jump is interrupted; the state will release it normally.
-        if not isForcedPlayerState(self.character) then
+        if not isForcedPlayerState(self.character)
+            or isFallingState(self.character)
+            or self.dropLanding then
             self.character:setIgnoreMovement(false)
         end
         self.ownsMovementLock = false
@@ -394,10 +502,13 @@ function ISParkourFreeJumpAction.onServerCommand(module, command, args)
         action:forceComplete()
     elseif command == "TransferAccepted" then
         Validation.moveCharacter(action.character, args.x, args.y, args.z)
+        action.dropLanding = args.dropLanding == true
+            or action.target.dropLanding == true
         action.transferred = true
         pendingNetworkRequests[args.requestId] = nil
         debugLog("Server transfer accepted " .. tostring(args.requestId))
-        if action.animationDone then
+        if action.animationDone or action.target.requiresDeferredTransfer then
+            action.animationDone = true
             action:forceComplete()
         end
     elseif command == "TransferRejected" then
@@ -437,6 +548,7 @@ function ISParkourFreeJumpAction:new(character, target)
     action.transferRequested = false
     action.transferred = false
     action.movementProgress = 0
+    action.dropLanding = target.dropLanding == true
     action.serverApproved = not isClient()
     action.controlReleased = false
     action.ownsMovementLock = false
