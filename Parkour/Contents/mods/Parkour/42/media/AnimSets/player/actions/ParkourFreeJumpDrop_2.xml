@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animNode x_extends="ParkourFreeJump.xml">
-	<m_AnimName>FreeJumpDrop_2</m_AnimName>
+	<m_AnimName>FreeJump_2</m_AnimName>
 	<m_Priority>20</m_Priority>
 	<m_ConditionPriority>20</m_ConditionPriority>
 	<m_SpeedScale>1.65</m_SpeedScale>
