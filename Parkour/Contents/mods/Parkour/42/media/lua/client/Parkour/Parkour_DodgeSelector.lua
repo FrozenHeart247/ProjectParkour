@@ -5,22 +5,32 @@ local ParkourDodgeSelector = {}
 local VARIANTS_BY_DIRECTION = {
     Forward = {
         {
-            id = "DiveRollForward",
-            sandboxKey = "EnableDodgeDiveRollForward",
-            movementDurationMs = 700,
-            -- 1.80 s clip / 1.20 speed, released at ~92% so the
-            -- hit-reaction AnimSet never reaches its vanilla fallback node.
-            reactionDurationMs = 1380,
-            linearMovementBlend = 0,
-            distance = 1,
-            failsafeDurationMs = 2200,
-        },
-        {
-            id = "ForwardRollDodge",
+            id = "ForwardRollDodge", --DefaultRoll
             sandboxKey = "EnableDodgeForwardRollForward",
             movementDurationMs = 980, --1150
             -- 1.20 s clip / 1.35 speed, released before ActiveAnimFinished.
             reactionDurationMs = 820,
+            linearMovementBlend = 0.65,
+            distance = 5,
+            failsafeDurationMs = 2200,
+        },
+        {
+            id = "CombatRollForward", --SpinRoll
+            sandboxKey = "EnableDodgeCombatRollForward",
+            movementDurationMs = 1300,--1500
+            -- 2.10 s clip / 1.30 speed. The release stays just ahead of
+            -- ActiveAnimFinished so the hit-reaction branch cannot fall back.
+            reactionDurationMs = 1480,--1480
+            linearMovementBlend = 0.65,
+            distance = 5,
+            failsafeDurationMs = 2600,
+        },
+        {
+            id = "LowDiveDodgeForward",
+            sandboxKey = "EnableDodgeLowDiveForward",
+            movementDurationMs = 1250,
+            -- 1.57 s clip / 1.20 speed.
+            reactionDurationMs = 1200,
             linearMovementBlend = 0.65,
             distance = 5,
             failsafeDurationMs = 2200,
@@ -36,6 +46,16 @@ local VARIANTS_BY_DIRECTION = {
             linearMovementBlend = 0.65,
             distance = 4,
             failsafeDurationMs = 2200,
+        },
+        {
+            id = "BackflipDodge",
+            sandboxKey = "EnableDodgeBackflipBack",
+            movementDurationMs = 1600,
+            -- 2.20 s clip / 1.30 speed.
+            reactionDurationMs = 1550,
+            linearMovementBlend = 0.65,
+            distance = 4,
+            failsafeDurationMs = 2400,
         },
     },
     Left = {

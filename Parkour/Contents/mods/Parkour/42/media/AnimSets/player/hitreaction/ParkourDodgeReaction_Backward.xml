@@ -20,7 +20,7 @@
 		<m_Type>STRING</m_Type>
 		<m_StringValue>Backward</m_StringValue>
 	</m_Conditions>
-	<m_Conditions>
+	<m_Conditions x_name="parkour-reaction-backward-variant">
 		<m_Name>ParkourDodgeVariant</m_Name>
 		<m_Type>STRING</m_Type>
 		<m_StringValue>CorkscrewEvadeBack</m_StringValue>

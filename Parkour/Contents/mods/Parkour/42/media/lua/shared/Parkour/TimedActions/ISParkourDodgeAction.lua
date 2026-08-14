@@ -15,6 +15,9 @@ local ANIMATION_START_TIMEOUT_MS = 500
 local REACTION_TAIL_GUARD_MS = 1500
 local REACTION_ATTACK_CAPTURE_RADIUS = 3.5
 local MAX_MOVEMENT_STEP = 0.08
+-- Eight collision-checked microsteps are enough to compensate a roughly 50%
+-- grab slowdown at 30 FPS without exceeding the clip's normal peak travel.
+local MAX_CATCH_UP_DISTANCE = MAX_MOVEMENT_STEP * 8
 
 local reactionTailByCharacter = setmetatable({}, { __mode = "k" })
 
@@ -332,6 +335,17 @@ local function canMoveTo(character, targetX, targetY)
     return true
 end
 
+local function getActualTravelDistance(action)
+    if not action.movementOriginX or not action.movementOriginY then
+        return 0
+    end
+
+    local offsetX = action.character:getX() - action.movementOriginX
+    local offsetY = action.character:getY() - action.movementOriginY
+    local distance = offsetX * action.travelX + offsetY * action.travelY
+    return math.min(math.max(distance, 0), action.dodgeDistance)
+end
+
 local function moveDistance(action, distance)
     local remaining = distance
 
@@ -347,9 +361,14 @@ local function moveDistance(action, distance)
         end
 
         action.character:moveUnmodded(action.travelX * step, action.travelY * step)
-        action.distanceMoved = action.distanceMoved + step
         remaining = remaining - step
     end
+
+    -- moveUnmodded() can be reduced by vanilla movement modifiers such as a
+    -- sprinter's grab. Track the world-space result instead of assuming that
+    -- every requested step was applied in full. The next update then requests
+    -- only the missing part of the same smooth animation curve.
+    action.distanceMoved = getActualTravelDistance(action)
 end
 
 local function canStartInternal(character, travelX, travelY, ignoreActionQueue, allowReactionEscape)
@@ -406,6 +425,8 @@ end
 function ISParkourDodgeAction:start()
     self.action:setUseProgressBar(false)
     self.startedAt = getTimestampMs()
+    self.movementOriginX = self.character:getX()
+    self.movementOriginY = self.character:getY()
 
     self.character:setVariable(DIRECTION_VARIABLE, self.direction)
     self.character:setVariable(VARIANT_VARIABLE, self.variant)
@@ -483,8 +504,14 @@ function ISParkourDodgeAction:update()
         + (movementProgress - smoothProgress) * self.linearMovementBlend
     local targetDistance = self.dodgeDistance * easedProgress
 
+    -- Reconcile against the distance that was actually travelled. This keeps
+    -- normal dodges unchanged and gently catches up when vanilla temporarily
+    -- scales down movement during a zombie grab.
+    self.distanceMoved = getActualTravelDistance(self)
+
     if not self.movementBlocked and targetDistance > self.distanceMoved then
-        moveDistance(self, targetDistance - self.distanceMoved)
+        local missingDistance = targetDistance - self.distanceMoved
+        moveDistance(self, math.min(missingDistance, MAX_CATCH_UP_DISTANCE))
     end
 
     if self.reactionAnimation and now >= self.reactionAnimationEndsAt then
@@ -515,6 +542,17 @@ function ISParkourDodgeAction:releaseControl()
         return
     end
     self.controlReleased = true
+
+    debugLog(
+        string.format(
+            "Movement result: %s/%s actual=%.3f target=%.3f blocked=%s",
+            self.direction,
+            self.variant,
+            getActualTravelDistance(self),
+            self.dodgeDistance,
+            tostring(self.movementBlocked)
+        )
+    )
 
     if self.reactionAnimation then
         -- Clearing the selector alone leaves the Java reaction state alive,
@@ -594,6 +632,8 @@ function ISParkourDodgeAction:new(
     action.failsafeDurationMs = variantProfile and variantProfile.failsafeDurationMs
         or DEFAULT_FAILSAFE_DURATION_MS
     action.distanceMoved = 0
+    action.movementOriginX = nil
+    action.movementOriginY = nil
     action.movementBlocked = false
     action.isInvalid = false
     action.controlReleased = false
