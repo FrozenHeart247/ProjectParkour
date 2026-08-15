@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>ParkourWallRunUp</m_Name>
+	<m_Priority>6</m_Priority>
+	<m_AnimName>Parkour_WallRunUp</m_AnimName>
+	<m_deferredBoneAxis>Y</m_deferredBoneAxis>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_EarlyBlendOut>false</m_EarlyBlendOut>
+	<m_Looped>false</m_Looped>
+	<m_SpeedScale>1.00</m_SpeedScale>
+	<m_BlendTime>0.08</m_BlendTime>
+	<m_BlendOutTime>0.10</m_BlendOutTime>
+	<m_Conditions>
+		<m_Name>PerformingAction</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>ParkourWallRunUp</m_StringValue>
+	</m_Conditions>
+	<m_Events>
+		<m_EventName>ParkourWallRunStarted</m_EventName>
+		<m_TimePc>0.01</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events>
+		<m_EventName>ParkourWallRunAirborne</m_EventName>
+		<m_TimePc>0.08</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events>
+		<m_EventName>ParkourWallRunTransfer</m_EventName>
+		<m_TimePc>0.99</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events>
+		<m_EventName>ParkourWallRunDone</m_EventName>
+		<m_TimePc>0.99</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_SubStateBoneWeights>
+		<boneName>Dummy01</boneName>
+	</m_SubStateBoneWeights>
+</animNode>

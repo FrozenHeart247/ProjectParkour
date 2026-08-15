@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="vaultOverSprint_ParkourVaultOver.xml">
+	<m_Name>vaultOverSprint2Handed</m_Name>
+	<m_Conditions x_name="83038290-10e9-4676-8528-2ae333ce7bde">
+		<m_Name>Weapon</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>2handed</m_Value>
+	</m_Conditions>
+</animNode>
