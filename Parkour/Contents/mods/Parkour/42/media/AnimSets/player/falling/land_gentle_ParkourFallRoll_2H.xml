@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animNode x_extends="land_gentle_ParkourFallRoll.xml">
-	<m_Name>land_gentle_2H</m_Name>
-	<m_Conditions>
-		<m_Name>Weapon</m_Name>
-		<m_Type>STRING</m_Type>
-		<m_Value>2handed</m_Value>
-	</m_Conditions>
-</animNode>

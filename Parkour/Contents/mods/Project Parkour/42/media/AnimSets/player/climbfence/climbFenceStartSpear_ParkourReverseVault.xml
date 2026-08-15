@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animNode x_extends="climbFenceStart_ParkourReverseVault.xml">
-	<m_Name>climbFenceStartSpear</m_Name>
-	<m_Conditions x_name="de701bdb-e8f1-405b-b4ec-d74eb5e7df58">
-		<m_Name>Weapon</m_Name>
-		<m_Type>STRING</m_Type>
-		<m_Value>spear</m_Value>
-	</m_Conditions>
-</animNode>

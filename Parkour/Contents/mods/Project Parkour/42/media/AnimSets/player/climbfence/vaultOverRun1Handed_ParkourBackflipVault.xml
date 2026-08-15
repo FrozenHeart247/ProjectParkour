@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animNode x_extends="vaultOverRun_ParkourBackflipVault.xml">
-	<m_Name>vaultOverRun1Handed</m_Name>
-	<m_Conditions x_name="fc155663-37b5-4786-a884-8573b06ba781">
-		<m_Name>Weapon</m_Name>
-		<m_Type>STRING</m_Type>
-		<m_Value>1handed</m_Value>
-	</m_Conditions>
-</animNode>

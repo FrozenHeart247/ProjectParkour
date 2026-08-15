@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animNode x_extends="vaultOverSprint_ParkourVaultOver.xml">
-	<m_Name>vaultOverSprintHandgun</m_Name>
-	<m_Conditions x_name="2e77c92b-2437-4386-865f-66d65c3505d6">
-		<m_Name>Weapon</m_Name>
-		<m_Type>STRING</m_Type>
-		<m_Value>handgun</m_Value>
-	</m_Conditions>
-</animNode>

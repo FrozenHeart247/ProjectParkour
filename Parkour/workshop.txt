@@ -1,5 +1,0 @@
-version=1
-title=Project Parkour
-description=Expanded parkour movement for Build 42: progression, randomized vault animations, directional dodges, free jumping, window vaulting, fall rolls, high-fence moves, and roof climbing.
-tags=Build 42
-visibility=private

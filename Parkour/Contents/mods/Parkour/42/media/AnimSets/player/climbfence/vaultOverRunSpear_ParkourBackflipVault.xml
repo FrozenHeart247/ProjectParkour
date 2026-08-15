@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<animNode x_extends="vaultOverRun_ParkourBackflipVault.xml">
-	<m_Name>vaultOverRunSpear</m_Name>
-	<m_Conditions x_name="d20e136e-18e7-477c-9b67-9ab5a9dd49af">
-		<m_Name>Weapon</m_Name>
-		<m_Type>STRING</m_Type>
-		<m_Value>spear</m_Value>
-	</m_Conditions>
-</animNode>
