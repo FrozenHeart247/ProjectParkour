@@ -1,4 +1,5 @@
 local Validation = require "Parkour/Parkour_FreeJumpValidation"
+local Progression = require "Parkour/Parkour_Progression"
 
 local MODULE = "ParkourFreeJump"
 local REQUEST_LIFETIME_MS = 4000
@@ -7,9 +8,11 @@ local MIN_DEFERRED_TRANSFER_DELAY_MS = 300
 local MAX_PATH_OVERSHOOT = 0.75
 local MAX_LATERAL_DEVIATION = 0.90
 local COOLDOWN_MS = 800
+local TERMINAL_LIFETIME_MS = 8000
 
 local pendingByPlayer = setmetatable({}, { __mode = "k" })
 local cooldownByPlayer = setmetatable({}, { __mode = "k" })
+local terminalByPlayer = setmetatable({}, { __mode = "k" })
 
 local function debugLog(message)
     local settings = SandboxVars and SandboxVars.Parkour
@@ -67,11 +70,24 @@ local function beginRequest(player, args)
     end
 
     local now = getTimestampMs()
+    local pending = pendingByPlayer[player]
+    if pending then
+        if pending.requestId == requestId then
+            sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
+        else
+            reject(player, requestId, "Begin", "busy")
+        end
+        return
+    end
+    local terminal = terminalByPlayer[player]
+    if terminal and terminal.requestId == requestId and now <= terminal.expiresAt then
+        sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
+        return
+    end
     if player:isDead()
         or player:getVehicle()
         or player:isOnFloor()
         or player:hasHitReaction()
-        or pendingByPlayer[player] ~= nil
         or now < (cooldownByPlayer[player] or 0) then
         reject(player, requestId, "Begin", "character")
         return
@@ -81,6 +97,11 @@ local function beginRequest(player, args)
     local originY = math.floor(tonumber(args.originY) or -1000000)
     local originZ = math.floor(tonumber(args.originZ) or -1000000)
     local distance = math.floor((tonumber(args.distance) or -1000000) + 0.5)
+    local maximumDistance = Progression.getMaximumFreeJumpDistance(player)
+    if distance < 2 or distance > maximumDistance then
+        reject(player, requestId, "Begin", "level")
+        return
+    end
     if math.floor(player:getX()) ~= originX
         or math.floor(player:getY()) ~= originY
         or math.floor(player:getZ()) ~= originZ then
@@ -108,6 +129,14 @@ local function beginRequest(player, args)
         reject(player, requestId, "Begin", reason or "target")
         return
     end
+    local featureId = target.crossesLowVehicle
+        and "FreeJumpVehicle"
+        or Progression.getFreeJumpFeature(distance, target.dropLanding == true)
+    local progressionAllowed, progressionReason = Progression.canUse(player, featureId)
+    if not progressionAllowed then
+        reject(player, requestId, "Begin", progressionReason or "progression")
+        return
+    end
     if target.landingSquare:getX() ~= math.floor(tonumber(args.landingSquareX) or -1000000)
         or target.landingSquare:getY() ~= math.floor(tonumber(args.landingSquareY) or -1000000)
         or target.landingSquare:getZ() ~= math.floor(tonumber(args.landingSquareZ) or -1000000) then
@@ -127,6 +156,7 @@ local function beginRequest(player, args)
         startX = target.startX,
         startY = target.startY,
         requiresDeferredTransfer = target.requiresDeferredTransfer == true,
+        featureId = featureId,
     }
     cooldownByPlayer[player] = now + COOLDOWN_MS
     sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
@@ -135,6 +165,13 @@ end
 
 local function completeRequest(player, args)
     local requestId = args and args.requestId
+    local terminal = player and terminalByPlayer[player]
+    if terminal
+        and terminal.requestId == requestId
+        and getTimestampMs() <= terminal.expiresAt then
+        sendServerCommand(player, MODULE, "TransferAccepted", terminal.payload)
+        return
+    end
     local request = player and pendingByPlayer[player]
     if not request or request.requestId ~= requestId then
         if player and isValidRequestId(requestId) then
@@ -193,17 +230,52 @@ local function completeRequest(player, args)
         return
     end
 
+    local featureId = target.crossesLowVehicle
+        and "FreeJumpVehicle"
+        or Progression.getFreeJumpFeature(request.distance, target.dropLanding == true)
+    if featureId ~= request.featureId then
+        rollbackRequest(player, request, "target-changed")
+        reject(player, requestId, "Transfer", "target-changed")
+        return
+    end
+
     local transferX = target.targetX
     local transferY = target.targetY
     Validation.moveCharacter(player, transferX, transferY, target.targetZ)
-    sendServerCommand(player, MODULE, "TransferAccepted", {
+    Progression.spendEndurance(player, featureId)
+    local baseXP = ({ [2] = 3, [3] = 5, [4] = 7 })[request.distance] or 0
+    if target.crossesLowVehicle then
+        baseXP = baseXP + 1
+    end
+    Progression.awardXP(
+        player,
+        baseXP,
+        Progression.makeObstacleSignature(
+            "FreeJump",
+            request.originX,
+            request.originY,
+            request.originZ,
+            target.targetX,
+            target.targetY,
+            target.landingZ
+        ),
+        request.originX,
+        request.originY
+    )
+    local transferPayload = {
         requestId = requestId,
         x = transferX,
         y = transferY,
         z = target.targetZ,
         landingZ = target.landingZ,
         dropLanding = target.dropLanding == true,
-    })
+    }
+    terminalByPlayer[player] = {
+        requestId = requestId,
+        expiresAt = now + TERMINAL_LIFETIME_MS,
+        payload = transferPayload,
+    }
+    sendServerCommand(player, MODULE, "TransferAccepted", transferPayload)
     debugLog("Transferred request " .. tostring(requestId))
 end
 
@@ -237,9 +309,17 @@ local function removeExpiredRequests()
         local expired = now > request.expiresAt
         if expired then
             rollbackRequest(player, request, "timeout")
+            if player and not player:isDead() then
+                reject(player, request.requestId, "Transfer", "timeout")
+            end
         end
         if not player or player:isDead() or player:getVehicle() or expired then
             pendingByPlayer[player] = nil
+        end
+    end
+    for player, terminal in pairs(terminalByPlayer) do
+        if not player or now > terminal.expiresAt then
+            terminalByPlayer[player] = nil
         end
     end
 end

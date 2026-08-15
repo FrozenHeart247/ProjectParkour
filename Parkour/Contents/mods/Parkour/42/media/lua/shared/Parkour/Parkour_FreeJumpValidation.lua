@@ -432,7 +432,7 @@ local function routeIsClear(cell, startX, startY, targetX, targetY, z, vehicles)
             previousY = squareY
         end
     end
-    return true, crossesUnsupportedFloor
+    return true, crossesUnsupportedFloor, routeVehicleCount > 0
 end
 
 local function isLandingSquareClear(
@@ -680,7 +680,7 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
         end
         dropLanding = true
     end
-    local routeClear, requiresDeferredTransfer = routeIsClear(
+    local routeClear, requiresDeferredTransfer, crossesLowVehicle = routeIsClear(
         cell,
         startX,
         startY,
@@ -707,6 +707,7 @@ function ParkourFreeJumpValidation.findTargetFromOrigin(
         landingZ = landingSquare:getZ(),
         dropLanding = dropLanding,
         requiresDeferredTransfer = requiresDeferredTransfer,
+        crossesLowVehicle = crossesLowVehicle == true,
         distance = distance,
         directionName = directionName,
         direction = direction,

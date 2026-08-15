@@ -2,6 +2,7 @@ require "Parkour/Parkour_DodgeConfig"
 require "Parkour/TimedActions/ISParkourDodgeAction"
 local ParkourDodgeSelector = require "Parkour/Parkour_DodgeSelector"
 local ParkourDodgeDirection = require "Parkour/Parkour_DodgeDirection"
+local Progression = require "Parkour/Parkour_Progression"
 
 local ParkourDodgeInput = {}
 
@@ -90,6 +91,13 @@ end
 
 local function tryStartDodge(character)
     if not character or not character:isLocalPlayer() then
+        return
+    end
+
+    local allowed, progressionReason = Progression.canUse(character, "Dodge")
+    if not allowed then
+        Progression.showFailure(character, progressionReason)
+        debugLog("Blocked by progression: " .. tostring(progressionReason))
         return
     end
 

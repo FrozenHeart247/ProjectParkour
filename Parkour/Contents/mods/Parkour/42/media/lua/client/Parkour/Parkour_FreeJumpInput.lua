@@ -2,6 +2,7 @@ require "Parkour/Parkour_DodgeConfig"
 require "Parkour/TimedActions/ISParkourFreeJumpAction"
 
 local Validation = require "Parkour/Parkour_FreeJumpValidation"
+local Progression = require "Parkour/Parkour_Progression"
 
 local COOLDOWN_MS = 800
 local MIN_FACING_ALIGNMENT = 0.90
@@ -30,16 +31,64 @@ local function tryStart(character)
         return
     end
 
-    local preferredDistance = Validation.getPreferredDistance(character)
+    local maximumDistance = Progression.getMaximumFreeJumpDistance(character)
+    if maximumDistance < 2 then
+        Progression.showFailure(character, "level")
+        debugLog("Blocked by progression: level")
+        return
+    end
+
+    local preferredDistance = math.min(
+        Validation.getPreferredDistance(character),
+        maximumDistance
+    )
     local target, reason = Validation.findTarget(
         character,
         preferredDistance,
         MIN_FACING_ALIGNMENT
     )
-    if not target or not ISParkourFreeJumpAction.canStart(character, target, false) then
+    local featureId = target and (
+        target.crossesLowVehicle
+            and "FreeJumpVehicle"
+            or Progression.getFreeJumpFeature(target.distance, target.dropLanding == true)
+    )
+    local progressionAllowed, progressionReason = false, nil
+    if target then
+        -- Keep both return values.  Wrapping this call in `target and ...`
+        -- collapses Lua's multiple returns and loses the rejection reason.
+        progressionAllowed, progressionReason = Progression.canUse(
+            character,
+            featureId
+        )
+    end
+    local startAllowed, startReason = false, nil
+    if target and progressionAllowed then
+        startAllowed, startReason = ISParkourFreeJumpAction.canStart(
+            character,
+            target,
+            false
+        )
+    end
+    if not target
+        or not progressionAllowed
+        or not startAllowed then
         cooldownByCharacter[character] = now + 250
-        showInvalidFeedback(character)
-        debugLog("Blocked before start: " .. tostring(reason))
+        if target and not progressionAllowed then
+            Progression.showFailure(character, progressionReason)
+            debugLog(string.format(
+                "Blocked by progression: %s level=%d endurance=%.3f load=%.3f/%.3f",
+                tostring(progressionReason or "unknown"),
+                Progression.getLevel(character),
+                Progression.getEndurance(character),
+                character:getInventoryWeight(),
+                character:getMaxWeight()
+            ))
+        else
+            showInvalidFeedback(character)
+        end
+        debugLog("Blocked before start: " .. tostring(
+            progressionReason or startReason or reason or "unknown"
+        ))
         return
     end
 

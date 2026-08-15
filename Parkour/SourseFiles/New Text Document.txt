@@ -1,0 +1,380 @@
+Да. Я посмотрел именно TTG Club и буду опираться на то, что там помечено PHB, без UA/third-party. На сайте 2024-й Мистический ловкач действительно идёт именно как Rogue 2024 / Arcane Trickster PHB, а у дроу — актуальная для 2024 PHB линейка с Dancing Lights → Faerie Fire → Darkness.
+Я бы собирал его как Dexterity-first stealth/magic rogue, который постоянно играет от невидимости, укрытий, Advantage и Sneak Attack, а магию использует не как «мага с кинжалом», а как инструмент для создания выгодных ситуаций.
+Концепция
+Дроу — Плут 13, Мистический ловкач
+Роль:
+- разведчик и infiltrator;
+- главный специалист группы по Stealth/Thieves' Tools;
+- мобильный single-target damage dealer;
+- контроль через Web, Hypnotic Pattern и Faerie Fire;
+- магические уловки, иллюзии и Mage Hand;
+- очень высокая инициативность;
+- практически гарантированные хорошие проверки ключевых навыков.
+На 13-м уровне у тебя уже 7к6 Sneak Attack, 4/3/2 ячейки 1–3 уровней и 9 подготовленных заклинаний.
+————
+1. Стартовые характеристики
+Если используем point buy, я рекомендую:
+Характеристика До background Бонус background Итог
+STR 8 — 8
+DEX 15 +2 17
+CON 14 — 14
+INT 15 +1 16
+WIS 10 — 10
+CHA 8 — 8
+Для background я беру Преступника. В 2024 PHB он даёт именно Ловкость, Телосложение, Интеллект, Origin Feat Alert, навыки Sleight of Hand и Stealth и владение Thieves' Tools.
+Это практически идеальный background для такого персонажа.
+Почему INT 16? Потому что у Мистического ловкача теперь гораздо больше свободы в выборе заклинаний, а DC заклинаний всё равно хочется нормальный. Кроме того, у дроу можно выбрать Интеллект как заклинательную характеристику его расовых заклинаний.
+————
+2. Дроу
+Берём Drow.
+Получаешь:
+- Darkvision 120 ft;
+- Dancing Lights;
+- на 3-м уровне персонажа — Faerie Fire;
+- на 5-м — Darkness;
+- Fey Ancestry;
+- один навык из Perception / Insight / Survival;
+- Trance.
+Для дополнительного навыка я бы взял Perception.
+Заклинательная характеристика дроу
+Выбираем Intelligence.
+Это важно: тогда расовые Faerie Fire и Darkness используют тот же INT, что и твои заклинания Мистического ловкача.
+————
+3. Навыки
+На первом уровне я бы взял у Rogue:
+- Acrobatics
+- Deception
+- Investigation
+- Perception
+А background уже даёт:
+- Sleight of Hand
+- Stealth
+Итого:
+Acrobatics, Deception, Investigation, Perception, Sleight of Hand, Stealth.
+Из них приоритет:
+Expertise на 1-м
+Stealth + Sleight of Hand.
+Это прямо рекомендуется и самим описанием Мистического ловкача на TTG.
+Expertise на 6-м
+Perception + Investigation.
+Получается очень сильный scout:
+- Stealth — проникновение;
+- Sleight of Hand — карманы/ловушки;
+- Perception — обнаружение;
+- Investigation — поиск секретов;
+- Thieves' Tools — замки/ловушки.
+А благодаря Reliable Talent с 7-го уровня ты ещё и перестаёшь практически проваливать обычные проверки навыков, в которых владеешь proficiency.
+————
+4. Прогрессия 1–13
+Вот основной маршрут.
+Уровень Что получаем Что делаем
+1 Sneak Attack 1d6, Expertise Stealth + Sleight of Hand
+2 Cunning Action Dash / Disengage / Hide бонусным
+3 Arcane Trickster Магия, Mage Hand Legerdemain, Steady Aim
+4 Feat Skill Expert: +1 DEX
+5 Sneak Attack 3d6, Cunning Strike, Uncanny Dodge Начинается настоящий rogue gameplay
+6 Expertise ×2 Perception + Investigation
+7 Evasion + Reliable Talent Становимся крайне живучим/надёжным
+8 ASI +2 DEX
+9 Magical Ambush Невидимость + spell control
+10 Feat Fey-Touched: +1 INT
+11 Sneak Attack 6d6, Improved Cunning Strike 2 Cunning Strike эффекта
+12 ASI +1 INT / +1 CON
+13 Versatile Trickster Mage Hand + Cunning Strike
+Эта последовательность даёт к 13 уровню:
+DEX 20 / INT 20 / CON 15.
+То есть обе главные характеристики максимизированы.
+————
+5. Почему Skill Expert на 4-м
+Skill Expert на TTG даёт:
+- +1 к любой характеристике;
+- proficiency в одном дополнительном навыке;
+- Expertise в одном навыке.
+Берём:
++1 DEX → 18
+Дополнительный навык:
+Persuasion или Insight.
+Я бы выбрал Persuasion, если хочется хоть немного социального персонажа.
+Expertise:
+Deception.
+В итоге у тебя получается очень забавный набор:
+Stealth + Sleight of Hand + Deception + Perception + Investigation
+
+с несколькими Expertise.
+————
+6. Уровень 8 — DEX 20
+После Skill Expert:
+DEX 18
+На 8-м просто:
++2 DEX → 20.
+Не мудрим.
+20 DEX означает:
+- +5 к атакам;
+- +5 к урону;
+- +5 AC;
+- +5 инициативе;
+- +5 Stealth;
+- +5 Acrobatics;
+- и т.д.
+А с Alert твоя инициатива становится особенно высокой, поскольку Alert позволяет добавлять PB к инициативе.
+————
+7. Уровень 10 — Fey Touched
+Вот здесь берём:
+Fey-Touched
++1 INT:
+INT 16 → 17
+И получаем:
+- Misty Step;
+- ещё одно заклинание 1-го уровня из Divination/Enchantment;
+- возможность бесплатно кастовать оба 1/Long Rest.
+Я бы выбрал:
+Command
+Почему?
+Потому что это очень хороший spell для твоего персонажа:
+- не требует атаки;
+- может заставить врага изменить позицию/поведение;
+- хорошо работает с высокой инициативой;
+- это не очередной damage spell.
+А Misty Step для rogue просто великолепен.
+Например:
+Hide → подкрался → Sneak Attack → Misty Step на крышу/балкон/за стену.
+
+Или:
+Web → Misty Step → занял идеальную позицию → атаковал.
+
+————
+8. Уровень 12 — INT 20
+После Fey Touched:
+INT 17
+На 12-м:
++1 INT / +1 CON
+Получаем:
+INT 18?
+Стоп — здесь есть важный момент: если мы начинаем с INT 16, Fey Touched делает его 17, а +1 на 12-м даст только 18.
+Поэтому оптимальнее немного изменить стартовую раскладку.
+Финальная стартовая раскладка:
+STR 8 / DEX 15 / CON 14 / INT 15 / WIS 10 / CHA 10
+Background:
++2 DEX / +1 INT
+→ DEX 17 / INT 16
+И тогда:
+- 4: Skill Expert → DEX 18
+- 8: +2 DEX → DEX 20
+- 10: Fey Touched → INT 17
+- 12: +2 INT → INT 19
+Всё равно не 20.
+Поэтому для максимума двух характеристик к 13 лучше использовать другую feat-последовательность.
+————
+9. Оптимальная последовательность ASI/Feats
+Я бы в итоге сделал так:
+4 уровень
+Skill Expert
+- DEX +1 → 18
+- Expertise: Deception
+8 уровень
++2 DEX
+- DEX 20
+10 уровень
+Fey Touched
+- INT +1 → 17
+- Misty Step
+- Command
+12 уровень
++2 INT
+- INT 19
+То есть на 13-м у нас:
+DEX 20 / INT 19 / CON 14
+
+И это, на мой взгляд, лучше, чем искусственно пытаться получить 20/20 ценой полезной черты.
+На следующем уровне можно сделать INT 20.
+Если же ты хочешь именно 20/20 строго к 13, я могу отдельно построить вариант под другой способ генерации характеристик — например, если у вас на столе разрешены не point buy, а стандартный массив/броски.
+————
+10. Заговоры
+У Мистического ловкача на 3-м уровне три заговора, один из которых обязательно Mage Hand. Два других выбираются из Wizard list.
+Я бы взял:
+1. Mage Hand
+Обязательный.
+Причём именно для Arcane Trickster это особенно вкусно благодаря Mage Hand Legerdemain.
+2. Minor Illusion
+Практически обязательный для концепции.
+Создание звуков/иллюзорных объектов позволяет делать огромное количество вещей вне боя.
+3. True Strike
+Вот это уже очень важно именно в 2024.
+Новый True Strike — это не старый «дай преимущество следующей атаке».
+Ты совершаешь атаку оружием непосредственно через заговор, используя свою spellcasting ability, а начиная с 5 уровня он добавляет 1d6 Radiant, с 11-го — 2d6.
+Для Arcane Trickster это вполне рабочая кнопка, особенно когда тебе не нужен Cunning Action/Hide.
+————
+11. Заклинания Arcane Trickster
+На 13-м у тебя:
+9 подготовленных заклинаний
+и ячейки:
+4 × 1-й / 3 × 2-й / 2 × 3-й.
+Я бы подготовил:
+1-й уровень
+Shield
+Это твоя кнопка «нет, спасибо» на вражескую атаку.
++5 AC до начала следующего хода — очень сильно для персонажа с лёгкой бронёй.
+Find Familiar
+Для разведки, Help, доставки предметов и всяких грязных трюков.
+Silent Image
+Для infiltration и создания отвлекающих манёвров.
+Disguise Self
+Очень подходит концепции.
+————
+2-й уровень
+Web
+Один из лучших spells для этого персонажа.
+20-foot cube, difficult terrain, restrain через Dexterity save.
+И главное — ты потом можешь спокойно раздавать Sneak Attack обездвиженным/контролируемым целям.
+Invisibility
+Прекрасная синергия с уровнем 9.
+Invisibility даёт Invisible, пока ты не атакуешь/не наносишь урон/не кастуешь заклинание.
+А на 9-м уровне появляется:
+Magical Ambush
+Если ты кастуешь spell, находясь Invisible, цель получает помеху на спасбросок от этого spell в текущий ход.
+Это очень сильная комбинация:
+Invisibility → Web / Hypnotic Pattern → враг бросает save с Disadvantage.
+
+————
+3-й уровень
+Hypnotic Pattern
+Очень сильный контроль: 30-foot cube, Wisdom save, при провале Charm + Incapacitated + speed 0.
+И именно здесь Magical Ambush начинает ощущаться по-настоящему.
+Counterspell
+На 13-м уровне уже доступен. TTG прямо указывает его как spell для Arcane Trickster.
+Dispel Magic
+Вторая универсальная кнопка против магии.
+————
+12. Что я бы реально держал подготовленным
+Если нужно выбрать ровно девять:
+1-й:
+1. Shield
+2. Find Familiar
+3. Disguise Self
+4. Silent Image
+2-й:
+5. Web
+6. Invisibility
+3-й:
+7. Hypnotic Pattern
+8. Counterspell
+9. Dispel Magic
+А Faerie Fire и Darkness у тебя идут от дроу и потому не занимают слоты твоего списка подготовленных заклинаний.
+————
+13. А как насчёт Darkness + drow?
+Вот здесь начинается самое интересное.
+У тебя есть:
+Darkness
+и 120-футовый Darkvision.
+Но я не рекомендую строить билд исключительно вокруг Darkness.
+Причина простая: ты сам тоже не видишь сквозь магическую тьму.
+Поэтому это скорее инструмент:
+- перекрыть линию обзора;
+- отрезать часть battlefield;
+- спрятаться;
+- заставить врагов двигаться;
+- создать безопасную зону для отхода.
+А основная боевая комбинация — Invisibility / Hide / Advantage / Steady Aim.
+————
+14. Как атаковать
+На 3-м уровне появляется Steady Aim:
+бонусным действием получаешь Advantage на следующий attack в текущем ходу, но если в этот ход не двигался, твоя скорость становится 0.
+То есть простой сценарий:
+Не двигаюсь → Steady Aim → атака → Sneak Attack.
+Но это не всегда лучший вариант.
+Если рядом союзник, тебе вообще не нужен Advantage для Sneak Attack: по правилам TTG достаточно, чтобы рядом с целью был твой союзник и у тебя не было помехи.
+Тогда:
+Attack → Sneak Attack → Cunning Action: Hide/Disengage
+намного лучше.
+————
+15. Оружие
+Я бы играл:
+Основное
+Shortsword / Scimitar
+с хорошим Finesse weapon.
+Дальний бой
+Shortbow
+или другое подходящее ranged weapon.
+У Rogue есть Weapon Mastery для двух типов оружия, а типы можно менять после Long Rest.
+Я бы выбрал оружие, которое лучше всего подходит под вашу конкретную кампанию и доступное снаряжение.
+Главное — иметь возможность регулярно делать Sneak Attack.
+————
+16. Cunning Strike
+С 5-го уровня появляется одна из самых интересных особенностей 2024 Rogue.
+Ты можешь жертвовать кубиками Sneak Attack ради дополнительных эффектов. Например, один из базовых вариантов — Withdraw, позволяющий после атаки переместиться до половины скорости без провоцирования Opportunity Attacks.
+То есть иногда вместо:
+7d6 Sneak Attack
+
+лучше сделать:
+6d6 + полезный Cunning Strike
+
+Потому что контроль/позиционка зачастую ценнее пары десятков дополнительного урона.
+На 11-м уровне ты уже можешь применять два эффекта Cunning Strike одновременно, жертвуя соответствующим количеством кубиков.
+————
+17. Уровень 9 — главный power spike
+Это, пожалуй, самый важный уровень именно для твоего концепта.
+Получаешь:
+Magical Ambush
+Invisible → cast spell → enemy save with Disadvantage.
+Поэтому идеальная последовательность:
+Hide/Invisibility → занять позицию → Web/Hypnotic Pattern → Magical Ambush → контроль.
+А после этого:
+Sneak Attack по нужной цели.
+Ты одновременно:
+- rogue;
+- scout;
+- controller;
+- infiltrator.
+————
+18. Уровень 13 — Versatile Trickster
+На 13-м получаешь Versatile Trickster.
+Когда используешь Trip из Cunning Strike на существе, ты можешь применить тот же эффект к другому существу в пределах 5 футов от твоей призрачной Mage Hand.
+То есть твоя Mage Hand наконец становится не просто «ворую предметы», а полноценной частью боевого геймплея.
+————
+Итоговый персонаж на 13
+Drow Rogue 13 — Arcane Trickster
+Характеристики
+STR 8
+DEX 20
+CON 14
+INT 19
+WIS 10
+CHA 8
+Feats
+- Origin: Alert
+- 4: Skill Expert
+- 10: Fey-Touched
+- 8/12: ASI
+Expertise
+- Stealth
+- Sleight of Hand
+- Perception
+- Investigation
+- Deception
+Главные заклинания
+Mage Hand
+Minor Illusion
+True Strike
+Shield
+Find Familiar
+Disguise Self
+Silent Image
+Web
+Invisibility
+Hypnotic Pattern
+Counterspell
+Dispel Magic
+Расовые
+Dancing Lights
+Faerie Fire
+Darkness
+Боевой стиль
+Hide → Advantage → Sneak Attack → Disengage/Hide
+или
+Invisibility → Magical Ambush → контроль
+или
+Web/Hypnotic Pattern → Sneak Attack → Cunning Strike
+————
+И я бы именно такого Дроу делал на TTG: не пытаться превращать его в «максимальный DPR с двумя арбалетами», а сделать настоящего теневого мага-разведчика, который очень неприятен для врагов именно за счёт позиционки, невидимости, Mage Hand, контроля и Sneak Attack.
+Причём тут есть один интересный момент: в 2024 PHB Arcane Trickster стал заметно интереснее старого 2014-го, потому что на TTG у него нет старого ограничения «только illusion/enchantment для большей части изучаемых spells» — таблица прямо описывает выбор из списка Wizard.
+Если хочешь, я могу следующим сообщением сделать прям совсем готовый лист 1→13: на каждом уровне отдельно характеристики, feat, навыки, expertise, конкретные заклинания, оружие, mastery и что именно нажимать в бою на каждом уровне, включая ожидаемый DPR и несколько боевых комбо.

@@ -1,0 +1,19 @@
+VERSION = 1,
+
+perk Parkour
+{
+    parent = Agility,
+    translation = Parkour,
+    passive = false,
+
+    xp1 = 54,
+    xp2 = 133,
+    xp3 = 240,
+    xp4 = 307,
+    xp5 = 373,
+    xp6 = 573,
+    xp7 = 640,
+    xp8 = 707,
+    xp9 = 800,
+    xp10 = 1200,
+}

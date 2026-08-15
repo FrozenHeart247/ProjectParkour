@@ -1,4 +1,5 @@
 local ParkourSprintWindowVault = {}
+local Progression = require "Parkour/Parkour_Progression"
 
 local WINDOW_VAULT_VARIABLE = "ParkourSprintWindowVault"
 local VAULT_VARIANT_VARIABLE = "ParkourVaultVariant"
@@ -25,9 +26,10 @@ local function debugLog(message)
     end
 end
 
-local function isEnabled()
+local function isEnabled(character)
     local settings = getSettings()
-    return not settings or settings.EnableSprintWindowVault ~= false
+    return (not settings or settings.EnableSprintWindowVault ~= false)
+        and Progression.canUse(character, "SprintWindowVault")
 end
 
 local function isWindowFrame(object)
@@ -130,12 +132,12 @@ local function clearRequest(character, reason)
 end
 
 local function canTrigger(character, object, now)
-    if not isEnabled()
-        or not character
+    if not character
         or not object
         or not instanceof(character, "IsoPlayer")
         or not character:isLocalPlayer()
         or character:isDead()
+        or not isEnabled(character)
         or character:getVehicle()
         or not character:isSprinting()
         or character:getBeenSprintingFor() < MIN_SPRINT_TICKS

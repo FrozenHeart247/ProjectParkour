@@ -2,6 +2,7 @@ require "TimedActions/ISBaseTimedAction"
 
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
 local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
+local Progression = require "Parkour/Parkour_Progression"
 
 ISParkourWallRunUpAction = ISBaseTimedAction:derive("ISParkourWallRunUpAction")
 
@@ -101,6 +102,22 @@ local function performLocalTransfer(action)
     end
     Validation.moveCharacter(action.character, transferX, transferY, target.targetZ)
     action.transferred = true
+    Progression.spendEndurance(action.character, "WallRunUp")
+    Progression.awardXP(
+        action.character,
+        8,
+        Progression.makeObstacleSignature(
+            "WallRunUp",
+            action.target.originX,
+            action.target.originY,
+            action.target.originZ,
+            target.targetX,
+            target.targetY,
+            target.targetZ
+        ),
+        action.target.originX,
+        action.target.originY
+    )
     return true
 end
 
@@ -187,7 +204,8 @@ function ISParkourWallRunUpAction:update()
         return
     end
 
-    if now - self.animationStartedAt >= ANIMATION_FAILSAFE_MS then
+    if now - self.animationStartedAt >= ANIMATION_FAILSAFE_MS
+        and (not self.transferRequested or self.transferred) then
         debugLog("Animation failsafe for request " .. tostring(self.requestId))
         self:forceComplete()
         return
@@ -325,6 +343,7 @@ function ISParkourWallRunUpAction.onServerCommand(module, command, args)
         pendingNetworkRequests[args.requestId] = nil
         action.invalid = true
         debugLog("Server rejected start: " .. tostring(args.reason))
+        Progression.showFailure(action.character, args.reason)
         action:forceComplete()
     elseif command == "TransferAccepted" then
         Validation.moveCharacter(action.character, args.x, args.y, args.z)
@@ -340,6 +359,7 @@ function ISParkourWallRunUpAction.onServerCommand(module, command, args)
         pendingNetworkRequests[args.requestId] = nil
         action.invalid = true
         debugLog("Server transfer rejected: " .. tostring(args.reason))
+        Progression.showFailure(action.character, args.reason)
         action:forceComplete()
     end
 end

@@ -1,4 +1,5 @@
 local ParkourDodgeSelector = {}
+local Progression = require "Parkour/Parkour_Progression"
 
 -- Each direction owns an independent shuffled bag. New animations only need
 -- one profile here, one conditioned AnimNode, and one Sandbox option.
@@ -6,6 +7,7 @@ local VARIANTS_BY_DIRECTION = {
     Forward = {
         {
             id = "ForwardRollDodge", --DefaultRoll
+            feature = "ForwardRollDodge",
             sandboxKey = "EnableDodgeForwardRollForward",
             movementDurationMs = 980, --1150
             -- 1.20 s clip / 1.35 speed, released before ActiveAnimFinished.
@@ -16,6 +18,7 @@ local VARIANTS_BY_DIRECTION = {
         },
         {
             id = "CombatRollForward", --SpinRoll
+            feature = "CombatRollForward",
             sandboxKey = "EnableDodgeCombatRollForward",
             movementDurationMs = 1300,--1500
             -- 2.10 s clip / 1.30 speed. The release stays just ahead of
@@ -27,6 +30,7 @@ local VARIANTS_BY_DIRECTION = {
         },
         {
             id = "LowDiveDodgeForward",
+            feature = "LowDiveDodgeForward",
             sandboxKey = "EnableDodgeLowDiveForward",
             movementDurationMs = 1250,
             -- 1.57 s clip / 1.20 speed.
@@ -39,6 +43,7 @@ local VARIANTS_BY_DIRECTION = {
     Backward = {
         {
             id = "CorkscrewEvadeBack",
+            feature = "CorkscrewEvadeBack",
             sandboxKey = "EnableDodgeCorkscrewEvadeBack",
             movementDurationMs = 1600,
             -- 2.533 s clip / 1.50 speed.
@@ -49,6 +54,7 @@ local VARIANTS_BY_DIRECTION = {
         },
         {
             id = "BackflipDodge",
+            feature = "BackflipDodge",
             sandboxKey = "EnableDodgeBackflipBack",
             movementDurationMs = 1600,
             -- 2.20 s clip / 1.30 speed.
@@ -60,17 +66,8 @@ local VARIANTS_BY_DIRECTION = {
     },
     Left = {
         {
-            id = "DiveRollLeft",
-            sandboxKey = "EnableDodgeDiveRollLeft",
-            movementDurationMs = 700,
-            -- 1.80 s clip / 1.50 speed.
-            reactionDurationMs = 1100,
-            linearMovementBlend = 0,
-            distance = 4,
-            failsafeDurationMs = 2200,
-        },
-        {
             id = "SideFlipDodgeLeft",
+            feature = "SideFlipDodgeLeft",
             sandboxKey = "EnableDodgeSideFlipLeft",
             movementDurationMs = 1600,
             -- 2.60 s clip / 1.30 speed.
@@ -83,6 +80,7 @@ local VARIANTS_BY_DIRECTION = {
     Right = {
         {
             id = "ButterflyDodgeRight",
+            feature = "ButterflyDodgeRight",
             sandboxKey = "EnableDodgeButterflyRight",
             movementDurationMs = 1600,
             -- 2.70 s clip / 1.50 speed.
@@ -94,8 +92,8 @@ local VARIANTS_BY_DIRECTION = {
     },
 }
 
-local bagsByCharacter = {}
-local lastVariantByCharacter = {}
+local bagsByCharacter = setmetatable({}, { __mode = "k" })
+local lastVariantByCharacter = setmetatable({}, { __mode = "k" })
 
 local function getSettings()
     return SandboxVars and SandboxVars.Parkour or nil
@@ -106,13 +104,18 @@ local function isEnabled(settings, sandboxKey)
     return not sandboxKey or not settings or settings[sandboxKey] ~= false
 end
 
-local function buildEnabledVariants(direction)
+local function buildEnabledVariants(character, direction)
     local variants = VARIANTS_BY_DIRECTION[direction] or {}
     local settings = getSettings()
     local enabled = {}
 
     for _, variant in ipairs(variants) do
-        if isEnabled(settings, variant.sandboxKey) then
+        -- DodgeInput performs the common live restrictions once before an
+        -- action starts.  The selector is responsible only for which variants
+        -- the current Parkour level has unlocked; re-running canUse() here can
+        -- otherwise turn a valid request into an unexplained empty pool.
+        if isEnabled(settings, variant.sandboxKey)
+            and Progression.isUnlocked(character, variant.feature) then
             enabled[#enabled + 1] = variant
         end
     end
@@ -163,7 +166,7 @@ local function refillBag(character, direction, enabled, signature)
 end
 
 function ParkourDodgeSelector.choose(character, direction)
-    local enabled = buildEnabledVariants(direction)
+    local enabled = buildEnabledVariants(character, direction)
     if #enabled == 0 then
         return nil
     end

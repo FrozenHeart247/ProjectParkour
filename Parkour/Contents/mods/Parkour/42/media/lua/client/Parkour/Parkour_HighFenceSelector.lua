@@ -1,4 +1,5 @@
 local ParkourHighFenceSelector = {}
+local Progression = require "Parkour/Parkour_Progression"
 
 local VARIANT_VARIABLE = "ParkourHighFenceVariant"
 local VANILLA_VARIANT = "Vanilla"
@@ -6,12 +7,12 @@ local VANILLA_VARIANT = "Vanilla"
 -- Add future successful high-fence animations here. Each character receives
 -- an independent shuffled bag, so every enabled clip plays once per cycle.
 local HIGH_FENCE_VARIANTS = {
-    { id = "HighFenceFrontFlip", sandboxKey = "EnableHighFenceFrontFlip" },
-    { id = "HighFenceVault02", sandboxKey = "EnableHighFenceVault02" },
+    { id = "HighFenceFrontFlip", sandboxKey = "EnableHighFenceFrontFlip", feature = "HighFenceFrontFlip" },
+    { id = "HighFenceVault02", sandboxKey = "EnableHighFenceVault02", feature = "HighFenceVault02" },
 }
 
-local bagsByCharacter = {}
-local lastVariantByCharacter = {}
+local bagsByCharacter = setmetatable({}, { __mode = "k" })
+local lastVariantByCharacter = setmetatable({}, { __mode = "k" })
 
 local function getSettings()
     return SandboxVars and SandboxVars.Parkour or nil
@@ -22,12 +23,16 @@ local function isEnabled(settings, sandboxKey)
     return not settings or settings[sandboxKey] ~= false
 end
 
-local function buildEnabledVariants()
+local function buildEnabledVariants(character)
     local settings = getSettings()
     local enabled = {}
 
     for _, variant in ipairs(HIGH_FENCE_VARIANTS) do
-        if isEnabled(settings, variant.sandboxKey) then
+        -- This selector replaces only the clip of a vanilla traversal.  Live
+        -- physical restrictions cannot cancel that traversal and therefore
+        -- must not make an unlocked animation disappear from its pool.
+        if isEnabled(settings, variant.sandboxKey)
+            and Progression.isUnlocked(character, variant.feature) then
             enabled[#enabled + 1] = variant.id
         end
     end
@@ -63,7 +68,7 @@ local function refillBag(character, enabled, signature)
 end
 
 local function chooseVariant(character)
-    local enabled = buildEnabledVariants()
+    local enabled = buildEnabledVariants(character)
     if #enabled == 0 then
         return VANILLA_VARIANT
     end
@@ -99,7 +104,11 @@ local function onAIStateChange(character, currentState, previousState)
     -- Failed and struggle outcomes ignore this variable and remain vanilla.
     local selected = chooseVariant(character)
     character:setVariable(VARIANT_VARIABLE, selected)
-    debugLog("Selected high-fence variant: " .. selected)
+    debugLog(string.format(
+        "Selected high-fence variant: %s (Parkour level %d)",
+        selected,
+        Progression.getLevel(character)
+    ))
 end
 
 Events.OnAIStateChange.Add(onAIStateChange)
