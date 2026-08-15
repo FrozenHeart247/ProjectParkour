@@ -1,6 +1,7 @@
 require "TimedActions/ISBaseTimedAction"
 
 local Validation = require "Parkour/Parkour_FreeJumpValidation"
+local Progression = require "Parkour/Parkour_Progression"
 
 ISParkourFreeJumpAction = ISBaseTimedAction:derive("ISParkourFreeJumpAction")
 
@@ -155,6 +156,29 @@ local function performLocalTransfer(action)
     )
     action.dropLanding = target.dropLanding == true
     action.transferred = true
+    local featureId = target.crossesLowVehicle
+        and "FreeJumpVehicle"
+        or Progression.getFreeJumpFeature(target.distance, target.dropLanding == true)
+    Progression.spendEndurance(action.character, featureId)
+    local baseXP = ({ [2] = 3, [3] = 5, [4] = 7 })[action.target.distance] or 0
+    if target.crossesLowVehicle then
+        baseXP = baseXP + 1
+    end
+    Progression.awardXP(
+        action.character,
+        baseXP,
+        Progression.makeObstacleSignature(
+            "FreeJump",
+            action.target.originX,
+            action.target.originY,
+            action.target.originZ,
+            target.targetX,
+            target.targetY,
+            target.landingZ
+        ),
+        action.target.originX,
+        action.target.originY
+    )
     return true
 end
 
@@ -251,28 +275,28 @@ local function rollbackIncompleteMovement(action)
 end
 
 function ISParkourFreeJumpAction.canStart(character, target, ignoreQueue)
-    if not character
-        or not target
-        or character:isDead()
-        or character:getVehicle()
-        or character:isOnFloor()
-        or character:isBlockMovement()
-        or character:getIgnoreMovement()
-        or character:isAttacking()
-        or character:isbFalling()
-        or isForcedPlayerState(character)
-        or (not ignoreQueue and character:hasTimedActions()) then
-        return false
+    if not character then return false, "character" end
+    if not target then return false, "target" end
+    if character:isDead() then return false, "dead" end
+    if character:getVehicle() then return false, "vehicle" end
+    if character:isOnFloor() then return false, "on-floor" end
+    if character:isBlockMovement() then return false, "block-movement" end
+    if character:getIgnoreMovement() then return false, "ignore-movement" end
+    if character:isAttacking() then return false, "attacking" end
+    if character:isbFalling() then return false, "falling" end
+    if isForcedPlayerState(character) then return false, "forced-state" end
+    if not ignoreQueue and character:hasTimedActions() then
+        return false, "timed-action"
     end
     if math.floor(character:getX()) ~= target.originX
         or math.floor(character:getY()) ~= target.originY
         or math.floor(character:getZ()) ~= target.originZ
         or math.abs(character:getX() - target.startX) > 0.75
         or math.abs(character:getY() - target.startY) > 0.75 then
-        return false
+        return false, "origin-position"
     end
 
-    local refreshed = Validation.findTargetFromOrigin(
+    local refreshed, refreshReason = Validation.findTargetFromOrigin(
         target.originX,
         target.originY,
         target.originZ,
@@ -282,7 +306,10 @@ function ISParkourFreeJumpAction.canStart(character, target, ignoreQueue)
         target.startX,
         target.startY
     )
-    return refreshed ~= nil
+    if not refreshed then
+        return false, "revalidate-" .. tostring(refreshReason or "unknown")
+    end
+    return true
 end
 
 function ISParkourFreeJumpAction:isValidStart()
@@ -499,6 +526,7 @@ function ISParkourFreeJumpAction.onServerCommand(module, command, args)
         pendingNetworkRequests[args.requestId] = nil
         action.invalid = true
         debugLog("Server rejected start: " .. tostring(args.reason))
+        Progression.showFailure(action.character, args.reason)
         action:forceComplete()
     elseif command == "TransferAccepted" then
         Validation.moveCharacter(action.character, args.x, args.y, args.z)
@@ -515,6 +543,7 @@ function ISParkourFreeJumpAction.onServerCommand(module, command, args)
         pendingNetworkRequests[args.requestId] = nil
         action.invalid = true
         debugLog("Server transfer rejected: " .. tostring(args.reason))
+        Progression.showFailure(action.character, args.reason)
         action:forceComplete()
     end
 end

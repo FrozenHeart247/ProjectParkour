@@ -10,6 +10,11 @@
 	<m_SpeedScale>1.0</m_SpeedScale>
 	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
 	<m_Conditions>
+		<m_Name>ParkourUnlockWindowVault</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+	<m_Conditions>
 		<m_Name>ClimbWindowStarted</m_Name>
 		<m_Type>BOOL</m_Type>
 		<m_Value>false</m_Value>

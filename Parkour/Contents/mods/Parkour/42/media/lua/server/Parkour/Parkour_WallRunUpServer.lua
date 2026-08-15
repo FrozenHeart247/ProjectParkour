@@ -1,5 +1,6 @@
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
 local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
+local Progression = require "Parkour/Parkour_Progression"
 
 local MODULE = "ParkourWallRunUp"
 local REQUEST_LIFETIME_MS = 4500
@@ -10,9 +11,11 @@ local MIN_TRANSFER_DELAY_MS = 850
 local MAX_PATH_OVERSHOOT = 0.75
 local MAX_LATERAL_DEVIATION = 0.90
 local COOLDOWN_MS = 1000
+local TERMINAL_LIFETIME_MS = 8000
 
 local pendingByPlayer = setmetatable({}, { __mode = "k" })
 local cooldownByPlayer = setmetatable({}, { __mode = "k" })
+local terminalByPlayer = setmetatable({}, { __mode = "k" })
 
 local function debugLog(message)
     local settings = SandboxVars and SandboxVars.Parkour
@@ -58,11 +61,29 @@ local function beginRequest(player, args)
     end
 
     local now = getTimestampMs()
+    local pending = pendingByPlayer[player]
+    if pending then
+        if pending.requestId == requestId then
+            sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
+        else
+            reject(player, requestId, "Begin", "busy")
+        end
+        return
+    end
+    local terminal = terminalByPlayer[player]
+    if terminal and terminal.requestId == requestId and now <= terminal.expiresAt then
+        sendServerCommand(player, MODULE, "BeginAccepted", { requestId = requestId })
+        return
+    end
+    local progressionAllowed, progressionReason = Progression.canUse(player, "WallRunUp")
+    if not progressionAllowed then
+        reject(player, requestId, "Begin", progressionReason or "progression")
+        return
+    end
     if player:isDead()
         or player:getVehicle()
         or player:isOnFloor()
         or player:hasHitReaction()
-        or pendingByPlayer[player] ~= nil
         or now < (cooldownByPlayer[player] or 0) then
         reject(player, requestId, "Begin", "character")
         return
@@ -180,6 +201,13 @@ end
 
 local function completeRequest(player, args)
     local requestId = args and args.requestId
+    local terminal = player and terminalByPlayer[player]
+    if terminal
+        and terminal.requestId == requestId
+        and getTimestampMs() <= terminal.expiresAt then
+        sendServerCommand(player, MODULE, "TransferAccepted", terminal.payload)
+        return
+    end
     local request = player and pendingByPlayer[player]
     if not request or request.requestId ~= requestId then
         if player and isValidRequestId(requestId) then
@@ -225,12 +253,34 @@ local function completeRequest(player, args)
         transferY = player:getY()
     end
     Validation.moveCharacter(player, transferX, transferY, target.targetZ)
-    sendServerCommand(player, MODULE, "TransferAccepted", {
+    Progression.spendEndurance(player, "WallRunUp")
+    Progression.awardXP(
+        player,
+        8,
+        Progression.makeObstacleSignature(
+            "WallRunUp",
+            request.originX,
+            request.originY,
+            request.originZ,
+            target.targetX,
+            target.targetY,
+            target.targetZ
+        ),
+        request.originX,
+        request.originY
+    )
+    local transferPayload = {
         requestId = requestId,
         x = transferX,
         y = transferY,
         z = target.targetZ,
-    })
+    }
+    terminalByPlayer[player] = {
+        requestId = requestId,
+        expiresAt = now + TERMINAL_LIFETIME_MS,
+        payload = transferPayload,
+    }
+    sendServerCommand(player, MODULE, "TransferAccepted", transferPayload)
     debugLog("Transferred request " .. tostring(requestId))
 end
 
@@ -265,12 +315,16 @@ local function updateAirborneGuards()
     local now = getTimestampMs()
 
     for player, request in pairs(pendingByPlayer) do
+        local expired = now > request.expiresAt
         if not player
             or player:isDead()
             or player:getVehicle()
-            or now > request.expiresAt then
+            or expired then
             pendingByPlayer[player] = nil
             finishAirborneGuard(player, request)
+            if expired and player and not player:isDead() then
+                reject(player, request.requestId, "Transfer", "timeout")
+            end
         elseif request.airborne then
             if now > request.airborneExpiresAt
                 or math.floor(player:getZ()) ~= request.originZ then
@@ -289,6 +343,12 @@ local function updateAirborneGuards()
                     )
                 end
             end
+        end
+    end
+
+    for player, terminal in pairs(terminalByPlayer) do
+        if not player or now > terminal.expiresAt then
+            terminalByPlayer[player] = nil
         end
     end
 

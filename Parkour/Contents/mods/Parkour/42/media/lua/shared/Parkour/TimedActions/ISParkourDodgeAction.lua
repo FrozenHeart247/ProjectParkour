@@ -1,5 +1,7 @@
 require "TimedActions/ISBaseTimedAction"
 
+local Progression = require "Parkour/Parkour_Progression"
+
 ISParkourDodgeAction = ISBaseTimedAction:derive("ISParkourDodgeAction")
 
 local ACTION_ANIMATION = "ParkourDodge"
@@ -26,6 +28,25 @@ local function debugLog(message)
     if settings and settings.DebugLogging then
         print("[Parkour Dodge] " .. message)
     end
+end
+
+local function spendEnduranceOnce(action)
+    if action.enduranceSpent then
+        return
+    end
+    action.enduranceSpent = true
+
+    local spent = Progression.spendEndurance(
+        action.character,
+        action.featureId or "Dodge"
+    )
+    debugLog(string.format(
+        "Endurance spent: %s/%s cost=%.3f remaining=%.3f",
+        action.direction,
+        action.variant,
+        spent,
+        Progression.getEndurance(action.character)
+    ))
 end
 
 local function isCurrentState(character, stateClass)
@@ -452,6 +473,10 @@ function ISParkourDodgeAction:start()
     self.character:setIsAiming(false)
     self:setActionAnim(ACTION_ANIMATION)
     if self.reactionAnimation then
+        -- Reaction dodges arm their dedicated hit-reaction AnimNode directly
+        -- and therefore do not wait for ParkourDodgeStarted from the normal
+        -- action layer. Charge once only after the action has actually begun.
+        spendEnduranceOnce(self)
         debugLog("Prepared reaction dodge action: " .. self.direction .. "/" .. self.variant)
     end
 end
@@ -531,6 +556,7 @@ function ISParkourDodgeAction:animEvent(event, parameter)
     if event == "ParkourDodgeStarted" and not self.animationStarted then
         self.animationStarted = true
         self.animationStartedAt = getTimestampMs()
+        spendEnduranceOnce(self)
         debugLog("Animation confirmed: " .. self.direction .. "/" .. self.variant)
     elseif event == "ParkourDodgeDone" then
         self:forceComplete()
@@ -625,6 +651,7 @@ function ISParkourDodgeAction:new(
     action.facingX = facingX
     action.facingY = facingY
     action.variant = variantProfile and variantProfile.id or "Default"
+    action.featureId = variantProfile and variantProfile.feature or "Dodge"
     action.dodgeDistance = variantProfile and variantProfile.distance or DEFAULT_DODGE_DISTANCE
     action.movementDurationMs = variantProfile and variantProfile.movementDurationMs
         or DEFAULT_MOVEMENT_DURATION_MS
@@ -640,6 +667,7 @@ function ISParkourDodgeAction:new(
     action.ownsMovementLock = false
     action.animationStarted = false
     action.animationStartedAt = nil
+    action.enduranceSpent = false
     action.escapeFromReaction = escapeFromReaction == true
     action.reactionAnimation = reactionAnimation == true
     action.reactionAttackers = setmetatable({}, { __mode = "k" })

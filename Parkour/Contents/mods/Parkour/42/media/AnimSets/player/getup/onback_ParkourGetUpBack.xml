@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>onback</m_Name>
+	<m_Priority>20</m_Priority>
+	<m_ConditionPriority>20</m_ConditionPriority>
+	<m_AnimName>Parkour_GetUpBack</m_AnimName>
+	<m_Looped>false</m_Looped>
+	<m_BlendTime>0.20</m_BlendTime>
+	<m_SpeedScale>1.15</m_SpeedScale>
+	<m_Conditions>
+		<m_Name>ParkourUnlockGetUpBack</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>true</m_Value>
+	</m_Conditions>
+</animNode>

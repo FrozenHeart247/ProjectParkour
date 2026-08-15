@@ -2,6 +2,7 @@ require "Parkour/Parkour_DodgeConfig"
 require "Parkour/TimedActions/ISParkourWallRunUpAction"
 
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
+local Progression = require "Parkour/Parkour_Progression"
 
 local COOLDOWN_MS = 1000
 local MIN_FACING_ALIGNMENT = 0.70
@@ -22,6 +23,13 @@ end
 
 local function tryStart(character)
     if not character or not character:isLocalPlayer() then
+        return
+    end
+
+    local allowed, progressionReason = Progression.canUse(character, "WallRunUp")
+    if not allowed then
+        Progression.showFailure(character, progressionReason)
+        debugLog("Blocked by progression: " .. tostring(progressionReason))
         return
     end
 

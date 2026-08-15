@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="vaultOverRunFail_ParkourVaultStumble.xml">
+	<m_Name>vaultOverRunFailSpear</m_Name>
+	<m_Conditions x_name="01888b43-ef4c-4a0b-8b88-c433038a0fae">
+		<m_Name>Weapon</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>spear</m_Value>
+	</m_Conditions>
+	<m_Transitions><m_Target>runSpear</m_Target></m_Transitions>
+</animNode>

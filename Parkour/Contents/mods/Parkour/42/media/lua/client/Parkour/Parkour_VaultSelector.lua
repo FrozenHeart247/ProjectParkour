@@ -1,4 +1,5 @@
 local ParkourVaultSelector = {}
+local Progression = require "Parkour/Parkour_Progression"
 
 local VARIANT_VARIABLE = "ParkourVaultVariant"
 local VANILLA_VARIANT = "Vanilla"
@@ -11,26 +12,26 @@ local VANILLA_VARIANT = "Vanilla"
 --    inherit or declare Priority/ConditionPriority 20 so sex-specific vanilla
 --    animation packs cannot win an otherwise equal AnimNode match.
 local RUN_VARIANTS = {
-    { id = "FrontFlip", sandboxKey = "EnableFrontFlip" },
-    { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault" },
-    { id = "DashVault", sandboxKey = "EnableDashVault" },
-    { id = "DiveRoll", sandboxKey = "EnableDiveRoll" },
-    { id = "BackflipVault", sandboxKey = "EnableBackflipVault" },
+    { id = "FrontFlip", sandboxKey = "EnableFrontFlip", feature = "FrontFlip" },
+    { id = "CorkscrewVault", sandboxKey = "EnableCorkscrewVault", feature = "CorkscrewVault" },
+    { id = "DashVault", sandboxKey = "EnableDashVault", feature = "DashVault" },
+    { id = "DiveRoll", sandboxKey = "EnableDiveRoll", feature = "DiveRoll" },
+    { id = "BackflipVault", sandboxKey = "EnableBackflipVault", feature = "BackflipVault" },
 }
 
 local SPRINT_VARIANTS = {
-    { id = "SpeedVault", sandboxKey = "EnableSpeedVault" },
-    { id = "VaultOver", sandboxKey = "EnableVaultOver" },
+    { id = "SpeedVault", sandboxKey = "EnableSpeedVault", feature = "SpeedVault" },
+    { id = "VaultOver", sandboxKey = "EnableVaultOver", feature = "VaultOver" },
 }
 
 local WALK_VARIANTS = {
-    { id = "ReverseVault", sandboxKey = "EnableReverseVault" },
+    { id = "ReverseVault", sandboxKey = "EnableReverseVault", feature = "ReverseVault" },
 }
 
 -- Each character owns a separate shuffled bag for walk, run, and sprint vaults.
 -- Every enabled animation is played once before its bag is shuffled again.
-local bagsByCharacter = {}
-local lastVariantByCharacter = {}
+local bagsByCharacter = setmetatable({}, { __mode = "k" })
+local lastVariantByCharacter = setmetatable({}, { __mode = "k" })
 
 local function getSettings()
     if not SandboxVars then
@@ -44,12 +45,19 @@ local function isEnabled(settings, sandboxKey)
     return not settings or settings[sandboxKey] ~= false
 end
 
-local function buildEnabledVariants(variants)
+local function buildEnabledVariants(character, variants)
     local settings = getSettings()
     local enabled = {}
 
     for _, variant in ipairs(variants) do
-        if isEnabled(settings, variant.sandboxKey) then
+        -- A vanilla fence traversal is going to happen regardless of the
+        -- selected visual clip.  Applying live endurance/load/injury gates
+        -- here only makes an already-unlocked animation silently fall back to
+        -- vanilla; it does not prevent the traversal itself.  Keep animation
+        -- pools level-gated and reserve canUse() for mechanics that the mod
+        -- actually owns (dodge, free jump, wall run, sprint-window vault).
+        if isEnabled(settings, variant.sandboxKey)
+            and Progression.isUnlocked(character, variant.feature) then
             enabled[#enabled + 1] = variant.id
         end
     end
@@ -98,7 +106,7 @@ local function refillBag(character, poolName, enabled, signature)
 end
 
 local function chooseVariant(character, poolName, variants)
-    local enabled = buildEnabledVariants(variants)
+    local enabled = buildEnabledVariants(character, variants)
     if #enabled == 0 then
         return VANILLA_VARIANT
     end
@@ -145,11 +153,19 @@ local function onAIStateChange(character, currentState, previousState)
         if outcome == "success" and character:getVariableBoolean("VaultOverSprint") then
             local selected = chooseVariant(character, "sprint", SPRINT_VARIANTS)
             character:setVariable(VARIANT_VARIABLE, selected)
-            debugLog("Selected sprint-vault variant: " .. selected)
+            debugLog(string.format(
+                "Selected sprint-vault variant: %s (Parkour level %d)",
+                selected,
+                Progression.getLevel(character)
+            ))
         elseif outcome == "success" and character:getVariableBoolean("VaultOverRun") then
             local selected = chooseVariant(character, "run", RUN_VARIANTS)
             character:setVariable(VARIANT_VARIABLE, selected)
-            debugLog("Selected running-vault variant: " .. selected)
+            debugLog(string.format(
+                "Selected running-vault variant: %s (Parkour level %d)",
+                selected,
+                Progression.getLevel(character)
+            ))
 
             -- Keep the condition alive after ClimbOverFenceState exits so the
             -- selected AnimNode can finish blending out. The next vault always
@@ -159,7 +175,11 @@ local function onAIStateChange(character, currentState, previousState)
             and not character:getVariableBoolean("VaultOverRun") then
             local selected = chooseVariant(character, "walk", WALK_VARIANTS)
             character:setVariable(VARIANT_VARIABLE, selected)
-            debugLog("Selected walking-vault variant: " .. selected)
+            debugLog(string.format(
+                "Selected walking-vault variant: %s (Parkour level %d)",
+                selected,
+                Progression.getLevel(character)
+            ))
         end
     end
 end

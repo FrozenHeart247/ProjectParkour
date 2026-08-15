@@ -1,5 +1,134 @@
 VERSION = 1,
 
+option MultiplierConfig.Parkour
+{
+    type = double,
+    min = 0,
+    max = 1000,
+    default = 1,
+    page = Character,
+}
+
+option Parkour.EnableProgression
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Progression,
+    translation = Parkour_EnableProgression,
+}
+
+option Parkour.UnlockAllParkour
+{
+    type = boolean,
+    default = false,
+    page = Parkour_Progression,
+    translation = Parkour_UnlockAllParkour,
+}
+
+option Parkour.XPMultiplier
+{
+    type = double,
+    min = 0,
+    max = 10,
+    default = 1,
+    page = Parkour_Progression,
+    translation = Parkour_XPMultiplier,
+}
+
+option Parkour.EnableAntiFarm
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Progression,
+    translation = Parkour_EnableAntiFarm,
+}
+
+option Parkour.WallRunUnlockLevel
+{
+    type = integer,
+    min = 0,
+    max = 10,
+    default = 8,
+    page = Parkour_Progression,
+    translation = Parkour_WallRunUnlockLevel,
+}
+
+option Parkour.UnlockWallRunAtLevel5
+{
+    type = boolean,
+    default = false,
+    page = Parkour_Progression,
+    translation = Parkour_UnlockWallRunAtLevel5,
+}
+
+option Parkour.LoadRestrictionMode
+{
+    type = enum,
+    numValues = 4,
+    default = 4,
+    page = Parkour_Restrictions,
+    translation = Parkour_LoadRestrictionMode,
+    valueTranslation = Parkour_LoadRestrictionMode,
+}
+
+option Parkour.InjuryRestrictionMode
+{
+    type = enum,
+    numValues = 3,
+    default = 2,
+    page = Parkour_Restrictions,
+    translation = Parkour_InjuryRestrictionMode,
+    valueTranslation = Parkour_InjuryRestrictionMode,
+}
+
+option Parkour.MinimumEnduranceMultiplier
+{
+    type = double,
+    min = 0,
+    max = 2,
+    default = 1,
+    page = Parkour_Restrictions,
+    translation = Parkour_MinimumEnduranceMultiplier,
+}
+
+option Parkour.EnableEnduranceCosts
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Costs,
+    translation = Parkour_EnableEnduranceCosts,
+}
+
+option Parkour.ActionCostMultiplier
+{
+    type = double,
+    min = 0,
+    max = 3,
+    default = 1,
+    page = Parkour_Costs,
+    translation = Parkour_ActionCostMultiplier,
+}
+
+option Parkour.DodgeCostLevel3
+{
+    type = double,
+    min = 0,
+    max = 100,
+    default = 10,
+    page = Parkour_Costs,
+    translation = Parkour_DodgeCostLevel3,
+}
+
+option Parkour.DodgeCostLevel10
+{
+    type = double,
+    min = 0,
+    max = 100,
+    default = 6,
+    page = Parkour_Costs,
+    translation = Parkour_DodgeCostLevel10,
+}
+
 option Parkour.EnableFrontFlip
 {
     type = boolean,
@@ -62,6 +191,46 @@ option Parkour.EnableReverseVault
     default = true,
     page = Parkour_Animations,
     translation = Parkour_EnableReverseVault,
+}
+
+option Parkour.EnableWindowVault
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableWindowVault,
+}
+
+option Parkour.EnableFallRollLanding
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableFallRollLanding,
+}
+
+option Parkour.EnableGetUpBack
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableGetUpBack,
+}
+
+option Parkour.EnableBumpRecovery
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableBumpRecovery,
+}
+
+option Parkour.EnableVaultStumble
+{
+    type = boolean,
+    default = true,
+    page = Parkour_Animations,
+    translation = Parkour_EnableVaultStumble,
 }
 
 option Parkour.EnableHighFenceFrontFlip
@@ -142,14 +311,6 @@ option Parkour.EnableDodgeBackflipBack
     default = true,
     page = Parkour_Animations,
     translation = Parkour_EnableDodgeBackflipBack,
-}
-
-option Parkour.EnableDodgeDiveRollLeft
-{
-    type = boolean,
-    default = true,
-    page = Parkour_Animations,
-    translation = Parkour_EnableDodgeDiveRollLeft,
 }
 
 option Parkour.EnableDodgeSideFlipLeft
