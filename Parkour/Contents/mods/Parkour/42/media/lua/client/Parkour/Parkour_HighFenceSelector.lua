@@ -1,5 +1,6 @@
 local ParkourHighFenceSelector = {}
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local VARIANT_VARIABLE = "ParkourHighFenceVariant"
 local VANILLA_VARIANT = "Vanilla"
@@ -92,7 +93,7 @@ local function debugLog(message)
 end
 
 local function onAIStateChange(character, currentState, previousState)
-    if not instanceof(character, "IsoPlayer") then
+    if not instanceof(character, "IsoPlayer") or not character:isLocalPlayer() then
         return
     end
 
@@ -103,7 +104,7 @@ local function onAIStateChange(character, currentState, previousState)
     -- Select on state entry, before the first climbwall AnimNode is resolved.
     -- Failed and struggle outcomes ignore this variable and remain vanilla.
     local selected = chooseVariant(character)
-    character:setVariable(VARIANT_VARIABLE, selected)
+    AnimationSync.setVariable(character, VARIANT_VARIABLE, selected)
     debugLog(string.format(
         "Selected high-fence variant: %s (Parkour level %d)",
         selected,

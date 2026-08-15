@@ -1,5 +1,6 @@
 local Validation = require "Parkour/Parkour_FreeJumpValidation"
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local MODULE = "ParkourFreeJump"
 local REQUEST_LIFETIME_MS = 4000
@@ -242,6 +243,7 @@ local function completeRequest(player, args)
     local transferX = target.targetX
     local transferY = target.targetY
     Validation.moveCharacter(player, transferX, transferY, target.targetZ)
+    AnimationSync.broadcastPosition(player, transferX, transferY, target.targetZ)
     Progression.spendEndurance(player, featureId)
     local baseXP = ({ [2] = 3, [3] = 5, [4] = 7 })[request.distance] or 0
     if target.crossesLowVehicle then

@@ -2,6 +2,7 @@ require "TimedActions/ISBaseTimedAction"
 
 local Validation = require "Parkour/Parkour_FreeJumpValidation"
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 ISParkourFreeJumpAction = ISBaseTimedAction:derive("ISParkourFreeJumpAction")
 
@@ -100,6 +101,11 @@ local function startApprovedAnimation(action)
     end
     action.animationRequestedAt = getTimestampMs()
     action:setActionAnim(ACTION_ANIMATION)
+    AnimationSync.broadcastVariable(
+        action.character,
+        "PerformingAction",
+        ACTION_ANIMATION
+    )
 end
 
 local function stabilizeDeferredMovement(action)
@@ -313,6 +319,21 @@ function ISParkourFreeJumpAction.canStart(character, target, ignoreQueue)
 end
 
 function ISParkourFreeJumpAction:isValidStart()
+    -- A queued timed action starts one or more updates after the key press.
+    -- While running/sprinting the character may cross a tile boundary during
+    -- that gap, making the input-time origin stale. Refresh it immediately
+    -- before the action takes ownership of movement.
+    local refreshed = Validation.findTarget(
+        self.character,
+        self.target.distance,
+        0.85
+    )
+    if refreshed then
+        self.target = refreshed
+        self.facingX = refreshed.direction.dx
+        self.facingY = refreshed.direction.dy
+        self.dropLanding = refreshed.dropLanding == true
+    end
     return ISParkourFreeJumpAction.canStart(self.character, self.target, true)
 end
 
@@ -325,8 +346,13 @@ end
 function ISParkourFreeJumpAction:start()
     self.action:setUseProgressBar(false)
     self.startedAt = getTimestampMs()
-    self.character:setVariable(DISTANCE_VARIABLE, tostring(self.target.distance))
-    self.character:setVariable(
+    AnimationSync.setVariable(
+        self.character,
+        DISTANCE_VARIABLE,
+        tostring(self.target.distance)
+    )
+    AnimationSync.setVariable(
+        self.character,
         DEFERRED_VARIABLE,
         tostring(self.target.requiresDeferredTransfer == true)
     )
@@ -473,8 +499,9 @@ function ISParkourFreeJumpAction:releaseControl()
         self.fallGuardCallback = nil
     end
     rollbackIncompleteMovement(self)
-    self.character:clearVariable(DISTANCE_VARIABLE)
-    self.character:clearVariable(DEFERRED_VARIABLE)
+    AnimationSync.clearVariable(self.character, DISTANCE_VARIABLE)
+    AnimationSync.clearVariable(self.character, DEFERRED_VARIABLE)
+    AnimationSync.clearVariable(self.character, "PerformingAction")
     if self.ownsMovementLock then
         -- A hit/fall state owns its own movement lock. Do not clear that lock
         -- when the jump is interrupted; the state will release it normally.

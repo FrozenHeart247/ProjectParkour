@@ -3,6 +3,7 @@ require "TimedActions/ISBaseTimedAction"
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
 local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 ISParkourWallRunUpAction = ISBaseTimedAction:derive("ISParkourWallRunUpAction")
 
@@ -68,6 +69,11 @@ local function startApprovedAnimation(action)
     end
     action.animationRequestedAt = getTimestampMs()
     action:setActionAnim(ACTION_ANIMATION)
+    AnimationSync.broadcastVariable(
+        action.character,
+        "PerformingAction",
+        ACTION_ANIMATION
+    )
 end
 
 local function beginAttackTailGuard(action)
@@ -294,6 +300,7 @@ function ISParkourWallRunUpAction:releaseControl()
     end
     sendCancel(self)
     pendingNetworkRequests[self.requestId] = nil
+    AnimationSync.clearVariable(self.character, "PerformingAction")
     -- Tail cleanup is deliberately last: movement must already be restored if
     -- an optional reaction-cleanup call ever fails at runtime.
     beginAttackTailGuard(self)

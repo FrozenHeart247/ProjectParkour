@@ -3,6 +3,7 @@ local Progression = require "Parkour/Parkour_Progression"
 
 local MODULE = "ParkourProgression"
 local MAX_ACTION_DURATION_MS = 20000
+local COMPLETION_POSITION_GRACE_MS = 1500
 local ANTI_FARM_UPDATE_INTERVAL_MS = 500
 local pendingByPlayer = setmetatable({}, { __mode = "k" })
 local terminalByPlayer = setmetatable({}, { __mode = "k" })
@@ -63,19 +64,13 @@ local function beginAction(player, args)
     }
 end
 
-local function completeAction(player, args)
-    local active = player and pendingByPlayer[player]
-    if not active or active.token ~= (args and args.token)
-        or active.actionId ~= (args and args.actionId) then
-        return
-    end
-    pendingByPlayer[player] = nil
-
+local function finalizeAction(player, active, now)
     local definition = Definitions.getXPAction(active.actionId)
-    local elapsed = getTimestampMs() - active.startedAt
+    local elapsed = now - active.startedAt
     if not definition or player:isDead() or player:getVehicle()
         or elapsed < definition.minimumDurationMs
         or elapsed > MAX_ACTION_DURATION_MS then
+        pendingByPlayer[player] = nil
         return
     end
 
@@ -83,9 +78,19 @@ local function completeAction(player, args)
     local dy = player:getY() - active.originY
     local travel = math.sqrt(dx * dx + dy * dy)
     if travel < definition.minimumTravel then
+        if now - active.completionRequestedAt < COMPLETION_POSITION_GRACE_MS then
+            return
+        end
+        pendingByPlayer[player] = nil
+        debugLog(string.format(
+            "Rejected completed %s after position grace: travel=%.3f",
+            active.actionId,
+            travel
+        ))
         return
     end
 
+    pendingByPlayer[player] = nil
     local signature = Progression.makeObstacleSignature(
         active.actionId,
         active.originX,
@@ -113,6 +118,18 @@ local function completeAction(player, args)
         travel,
         awarded
     ))
+end
+
+local function completeAction(player, args)
+    local active = player and pendingByPlayer[player]
+    if not active or active.token ~= (args and args.token)
+        or active.actionId ~= (args and args.actionId) then
+        return
+    end
+    if not active.completionRequestedAt then
+        active.completionRequestedAt = getTimestampMs()
+    end
+    finalizeAction(player, active, getTimestampMs())
 end
 
 local function cancelAction(player, args)
@@ -144,6 +161,9 @@ end
 local function expireActions()
     local now = getTimestampMs()
     for player, active in pairs(pendingByPlayer) do
+        if player and active.completionRequestedAt then
+            finalizeAction(player, active, now)
+        end
         if not player or player:isDead() or now - active.startedAt > MAX_ACTION_DURATION_MS then
             pendingByPlayer[player] = nil
         end

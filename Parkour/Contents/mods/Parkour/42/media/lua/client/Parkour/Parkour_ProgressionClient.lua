@@ -1,5 +1,6 @@
 local Definitions = require "Parkour/Parkour_ProgressionDefinitions"
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local lastStateByCharacter = setmetatable({}, { __mode = "k" })
 local updateCounterByCharacter = setmetatable({}, { __mode = "k" })
@@ -34,18 +35,21 @@ local function applyState(character, force)
     local previous = lastStateByCharacter[character]
     for variableName, value in pairs(nextState) do
         if force or not previous or previous[variableName] ~= value then
-            character:setVariable(variableName, value)
+            AnimationSync.setVariable(character, variableName, value)
         end
     end
     lastStateByCharacter[character] = nextState
 end
 
 local function onCreatePlayer(playerIndex, character)
-    applyState(character, true)
+    if character and character:isLocalPlayer() then
+        applyState(character, true)
+    end
 end
 
 local function onLevelPerk(character, perk, level)
-    if not character or perk ~= Progression.getPerk() then
+    if not character or not character:isLocalPlayer()
+        or perk ~= Progression.getPerk() then
         return
     end
 
@@ -61,7 +65,8 @@ local function onLevelPerk(character, perk, level)
 end
 
 local function onPlayerUpdate(character)
-    if not character or not instanceof(character, "IsoPlayer") then
+    if not character or not instanceof(character, "IsoPlayer")
+        or not character:isLocalPlayer() then
         return
     end
     local counter = (updateCounterByCharacter[character] or 0) + 1

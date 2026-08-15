@@ -1,5 +1,6 @@
 local ParkourVaultSelector = {}
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local VARIANT_VARIABLE = "ParkourVaultVariant"
 local VANILLA_VARIANT = "Vanilla"
@@ -136,14 +137,17 @@ local function debugLog(message)
 end
 
 local function onAIStateChange(character, currentState, previousState)
-    if not instanceof(character, "IsoPlayer") then
+    -- Only the owning client rolls the shuffled bag. Remote clients receive
+    -- that exact choice through ParkourAnimationSync instead of independently
+    -- choosing Vanilla or a different random clip.
+    if not instanceof(character, "IsoPlayer") or not character:isLocalPlayer() then
         return
     end
 
     local climbState = ClimbOverFenceState.instance()
     if currentState == climbState then
         if character:getVariableBoolean("ParkourSprintWindowVault") then
-            character:setVariable(VARIANT_VARIABLE, "WindowVault")
+            AnimationSync.setVariable(character, VARIANT_VARIABLE, "WindowVault")
             debugLog("Selected sprint-window-vault variant")
             return
         end
@@ -152,7 +156,7 @@ local function onAIStateChange(character, currentState, previousState)
 
         if outcome == "success" and character:getVariableBoolean("VaultOverSprint") then
             local selected = chooseVariant(character, "sprint", SPRINT_VARIANTS)
-            character:setVariable(VARIANT_VARIABLE, selected)
+            AnimationSync.setVariable(character, VARIANT_VARIABLE, selected)
             debugLog(string.format(
                 "Selected sprint-vault variant: %s (Parkour level %d)",
                 selected,
@@ -160,7 +164,7 @@ local function onAIStateChange(character, currentState, previousState)
             ))
         elseif outcome == "success" and character:getVariableBoolean("VaultOverRun") then
             local selected = chooseVariant(character, "run", RUN_VARIANTS)
-            character:setVariable(VARIANT_VARIABLE, selected)
+            AnimationSync.setVariable(character, VARIANT_VARIABLE, selected)
             debugLog(string.format(
                 "Selected running-vault variant: %s (Parkour level %d)",
                 selected,
@@ -174,7 +178,7 @@ local function onAIStateChange(character, currentState, previousState)
             and not character:getVariableBoolean("VaultOverSprint")
             and not character:getVariableBoolean("VaultOverRun") then
             local selected = chooseVariant(character, "walk", WALK_VARIANTS)
-            character:setVariable(VARIANT_VARIABLE, selected)
+            AnimationSync.setVariable(character, VARIANT_VARIABLE, selected)
             debugLog(string.format(
                 "Selected walking-vault variant: %s (Parkour level %d)",
                 selected,

@@ -1,6 +1,7 @@
 local Validation = require "Parkour/Parkour_WallRunUpValidation"
 local ZombieAttackGuard = require "Parkour/Parkour_ZombieAttackGuard"
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local MODULE = "ParkourWallRunUp"
 local REQUEST_LIFETIME_MS = 4500
@@ -253,6 +254,7 @@ local function completeRequest(player, args)
         transferY = player:getY()
     end
     Validation.moveCharacter(player, transferX, transferY, target.targetZ)
+    AnimationSync.broadcastPosition(player, transferX, transferY, target.targetZ)
     Progression.spendEndurance(player, "WallRunUp")
     Progression.awardXP(
         player,

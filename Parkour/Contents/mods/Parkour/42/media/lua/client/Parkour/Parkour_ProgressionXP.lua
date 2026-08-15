@@ -80,9 +80,13 @@ local function finishTrackedAction(character, previousState)
     local travel = math.sqrt(dx * dx + dy * dy)
     local definition = Definitions.getXPAction(active.actionId)
     local elapsed = getTimestampMs() - active.startedAt
+    local observedTraversalSuccess = active.sawSuccess
+        or (definition
+            and active.actionId == "HighFence"
+            and travel >= definition.minimumTravel)
     local succeeded = not character:isDead()
         and definition
-        and active.sawSuccess
+        and observedTraversalSuccess
         and travel >= definition.minimumTravel
         and elapsed >= definition.minimumDurationMs
 

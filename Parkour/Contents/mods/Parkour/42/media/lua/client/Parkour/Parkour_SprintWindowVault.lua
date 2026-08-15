@@ -1,5 +1,6 @@
 local ParkourSprintWindowVault = {}
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 local WINDOW_VAULT_VARIABLE = "ParkourSprintWindowVault"
 local VAULT_VARIANT_VARIABLE = "ParkourVaultVariant"
@@ -126,7 +127,7 @@ local function clearRequest(character, reason)
     end
 
     pendingByCharacter[character] = nil
-    character:setVariable(WINDOW_VAULT_VARIABLE, false)
+    AnimationSync.setVariable(character, WINDOW_VAULT_VARIABLE, false)
     character:setVariable(WINDOW_SMASH_TRIGGER_VARIABLE, false)
     debugLog("Finished: " .. reason)
 end
@@ -184,8 +185,8 @@ local function onObjectCollide(character, object)
         needsSmash = needsSmash,
         smashedWindow = false,
     }
-    character:setVariable(WINDOW_VAULT_VARIABLE, true)
-    character:setVariable(VAULT_VARIANT_VARIABLE, WINDOW_VAULT_VARIANT)
+    AnimationSync.setVariable(character, WINDOW_VAULT_VARIABLE, true)
+    AnimationSync.setVariable(character, VAULT_VARIANT_VARIABLE, WINDOW_VAULT_VARIANT)
     character:setVariable(WINDOW_SMASH_TRIGGER_VARIABLE, false)
 
     character:setSprinting(true)

@@ -1,6 +1,7 @@
 require "TimedActions/ISBaseTimedAction"
 
 local Progression = require "Parkour/Parkour_Progression"
+local AnimationSync = require "Parkour/Parkour_AnimationSync"
 
 ISParkourDodgeAction = ISBaseTimedAction:derive("ISParkourDodgeAction")
 
@@ -449,8 +450,8 @@ function ISParkourDodgeAction:start()
     self.movementOriginX = self.character:getX()
     self.movementOriginY = self.character:getY()
 
-    self.character:setVariable(DIRECTION_VARIABLE, self.direction)
-    self.character:setVariable(VARIANT_VARIABLE, self.variant)
+    AnimationSync.setVariable(self.character, DIRECTION_VARIABLE, self.direction)
+    AnimationSync.setVariable(self.character, VARIANT_VARIABLE, self.variant)
     if self.reactionAnimation then
         interruptReactionAttackers(self)
         -- Keep the existing Java reaction state and select a dedicated dodge
@@ -472,6 +473,11 @@ function ISParkourDodgeAction:start()
     self.character:setSprinting(false)
     self.character:setIsAiming(false)
     self:setActionAnim(ACTION_ANIMATION)
+    AnimationSync.broadcastVariable(
+        self.character,
+        "PerformingAction",
+        ACTION_ANIMATION
+    )
     if self.reactionAnimation then
         -- Reaction dodges arm their dedicated hit-reaction AnimNode directly
         -- and therefore do not wait for ParkourDodgeStarted from the normal
@@ -596,8 +602,9 @@ function ISParkourDodgeAction:releaseControl()
         beginReactionTailGuard(self)
         finishStaleReactionActionState(self.character)
     end
-    self.character:clearVariable(DIRECTION_VARIABLE)
-    self.character:clearVariable(VARIANT_VARIABLE)
+    AnimationSync.clearVariable(self.character, DIRECTION_VARIABLE)
+    AnimationSync.clearVariable(self.character, VARIANT_VARIABLE)
+    AnimationSync.clearVariable(self.character, "PerformingAction")
     if self.ownsMovementLock then
         -- canStart() guarantees that IgnoreMovement was false before the
         -- dodge. If a hit reaction interrupted us, that state now owns the
