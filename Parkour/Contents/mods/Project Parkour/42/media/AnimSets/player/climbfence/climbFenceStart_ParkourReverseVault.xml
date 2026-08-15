@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode>
+	<m_Name>climbFenceStart</m_Name>
+	<m_Priority>20</m_Priority>
+	<m_ConditionPriority>20</m_ConditionPriority>
+	<m_AnimName>Parkour_ReverseVault</m_AnimName>
+	<m_Looped>false</m_Looped>
+	<m_BlendTime>0.05</m_BlendTime>
+	<m_BlendOutTime>0.18</m_BlendOutTime>
+	<m_SpeedScale>1.0</m_SpeedScale>
+	<m_SyncTrackingEnabled>false</m_SyncTrackingEnabled>
+	<m_Conditions x_name="de454cb8-2f7e-4abc-86e2-d86b2d653dab">
+		<m_Name>ClimbFenceStarted</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="aa595499-a3c3-410e-a88e-6133f3d90e13">
+		<m_Name>VaultOverRun</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="d8acc559-84ea-41ba-8d13-900cab371d39">
+		<m_Name>VaultOverSprint</m_Name>
+		<m_Type>BOOL</m_Type>
+		<m_Value>false</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="0fbb6dfa-1ad6-4c6b-9087-13fcb9e94e3a">
+		<m_Name>ClimbFenceOutcome</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>success</m_Value>
+	</m_Conditions>
+	<m_Conditions x_name="e05535cc-bb0b-4f10-be29-fb2dcfe95826">
+		<m_Name>ParkourVaultVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>ReverseVault</m_Value>
+	</m_Conditions>
+	<m_Events x_name="52895f5b-1031-4f77-aac7-cbe9cc4f98d9">
+		<m_EventName>VaultOverStarted</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="704383b0-c73a-4d1e-b26f-95aa26bcb5cc">
+		<m_EventName>SetVariable</m_EventName>
+		<m_TimePc>0.96</m_TimePc>
+		<m_ParameterValue>ClimbFenceFinished=true</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="2453e8cb-f390-423c-90fd-46b6d4ee3086">
+		<m_EventName>SetCollidable</m_EventName>
+		<m_TimePc>0.62</m_TimePc>
+		<m_ParameterValue>true</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="fd12daf0-4896-462a-8908-eb6713622d90">
+		<m_EventName>PlayFenceSound</m_EventName>
+		<m_Time>Start</m_Time>
+		<m_ParameterValue>ClimbOverFenceLow</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="66b101b6-a0ca-43e8-af05-1b534fb6b154">
+		<m_EventName>PlayerVoiceSound</m_EventName>
+		<m_TimePc>0.10</m_TimePc>
+		<m_ParameterValue>JumpLow</m_ParameterValue>
+	</m_Events>
+	<m_Events x_name="07baeeea-f009-4ef6-9634-e8c0ba48790c">
+		<m_EventName>PlaySound</m_EventName>
+		<m_TimePc>0.60</m_TimePc>
+		<m_ParameterValue>LandLight</m_ParameterValue>
+	</m_Events>
+</animNode>

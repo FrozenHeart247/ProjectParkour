@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="ParkourFreeJump.xml">
+	<m_AnimName>FreeJump_3</m_AnimName>
+	<m_Conditions x_name="FreeJumpDistance">
+		<m_Name>ParkourFreeJumpDistance</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_Value>3</m_Value>
+	</m_Conditions>
+</animNode>

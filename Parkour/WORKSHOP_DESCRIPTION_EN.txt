@@ -1,0 +1,67 @@
+[h1]Project Parkour[/h1]
+
+Project Parkour expands movement in Project Zomboid Build 42 with a dedicated Parkour skill, new traversal mechanics, and a large collection of custom animations for both vanilla and entirely new actions.
+
+The mod does not turn a fresh survivor into a superhero. New moves are unlocked through progression, consume endurance, and require suitable conditions.
+
+[h2]Main Features[/h2]
+
+[list]
+[*][b]Randomized fence vaults[/b] — separate animation pools for walking, running, and sprinting. Shuffled bags prevent the same animation from constantly repeating.
+[*][b]High fences[/b] — a custom pool of successful high-fence climbing animations.
+[*][b]Windows[/b] — a new regular window-vault animation and a fast sprint vault. Closed windows break during the animation.
+[*][b]Free Jump[/b] — a dedicated forward-jump key. Distance depends on movement: 2 tiles while standing, 3 while running, and 4 while sprinting.
+[*]Free Jump can clear low fences, furniture, rocks, small stationary cars, rooftop gaps, and roof edges.
+[*]Full walls, tall fences, trucks, and other oversized obstacles cannot be jumped.
+[*][b]Directional Dodge[/b] — a dedicated dodge key. Outside combat stance it performs a forward dodge; while aiming, movement input selects forward, backward, left, or right.
+[*][b]Wall Run Up[/b] — run vertically up a wall and climb onto a clear roof one level above.
+[*][b]Landings and recovery[/b] — fall rolls plus custom stumble, fall, and get-up animations.
+[/list]
+
+[h2]Progression[/h2]
+
+The mod adds a 10-level [b]Parkour[/b] skill. XP is earned by actually moving through the world: low- and high-fence traversal, windows, Free Jump, Wall Run, and genuine sprinting. Every 30 tiles travelled while sprinting awards 5 XP.
+
+Built-in anti-farm rules reduce rewards from repeatedly using the same obstacle. Move to another part of your route to earn the full reward again.
+
+[list]
+[*][b]Level 1[/b] — basic parkour animations: controlled vaulting, window traversal, and fall/stumble recovery.
+[*][b]Level 2[/b] — the full 2–4 tile Free Jump system, jumps over small vehicles, landing rolls, Dash Vault, and Corkscrew Vault.
+[*][b]Level 3[/b] — four-direction dodge system and the low-fence Dive Roll.
+[*][b]Level 4[/b] — sprint window vaulting, new sprint vaults, and an advanced high-fence animation.
+[*][b]Level 5[/b] — Front Flip, Backflip Vault, advanced dodge variants, and a high-fence Front Flip.
+[*][b]Levels 6–7[/b] — mastery bonuses that gradually reduce endurance costs.
+[*][b]Level 8[/b] — Wall Run Up by default, plus further endurance improvements.
+[*][b]Levels 9–10[/b] — maximum efficiency for Wall Run, jumps, and dodges.
+[/list]
+
+[h2]Controls[/h2]
+
+The [b]Dodge[/b], [b]Forward Jump[/b], and [b]Climb onto Roof[/b] keys are unassigned by default.
+
+Configure them under:
+[b]Options → Mods → Parkour[/b]
+
+[h2]Sandbox Options[/h2]
+
+[list]
+[*]Enable or disable progression, or unlock every move immediately.
+[*]XP multiplier and anti-farm rules.
+[*]Wall Run unlock level, including an optional Level 5 unlock.
+[*]Endurance, overload, backpack, and serious-injury restrictions.
+[*]Endurance cost tuning.
+[*]Individual toggles for nearly every custom animation.
+[/list]
+
+[h2]Important[/h2]
+
+[list]
+[*]Requires [b]Project Zomboid 42.20 or newer[/b].
+[*]Supports single-player and multiplayer.
+[*]Manual mechanics validate their route and require a safe landing area.
+[*]Parkour mechanics are unavailable while overloaded. Low endurance and serious injuries may also block specific moves.
+[*]Dodges [b]do not grant invulnerability[/b] and have no I-frames.
+[*]Mods that replace the same player AnimSet branches may conflict. Higher compatibility priorities are included for common animation replacements.
+[/list]
+
+Project Parkour is designed for players who want more freedom of movement without receiving unlimited, consequence-free acrobatics on day one.

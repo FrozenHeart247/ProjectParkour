@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animNode x_extends="ParkourDodgeReaction_Forward.xml">
+	<m_AnimName>Parkour_ForwardRollDodge</m_AnimName>
+	<m_SpeedScale>1.35</m_SpeedScale>
+	<m_BlendOutTime>0.05</m_BlendOutTime>
+	<m_Conditions x_name="parkour-reaction-forward-variant">
+		<m_Name>ParkourDodgeVariant</m_Name>
+		<m_Type>STRING</m_Type>
+		<m_StringValue>ForwardRollDodge</m_StringValue>
+	</m_Conditions>
+</animNode>
